@@ -268,8 +268,8 @@ function BuildPlate() {
         </div>
         <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2}
           placeholder="Any combination or request — extra crispy, no garlic, half & half…"
-          className="mt-4 w-full resize-none rounded-2xl border border-foreground/15 bg-card p-3 text-sm outline-none focus:border-primary md:mt-5 md:p-4" />
-        <div className="mt-4 flex items-center justify-between gap-4 rounded-full bg-foreground p-2 pl-6 text-background md:mt-5">
+          className="mt-3 w-full resize-none rounded-2xl border border-foreground/15 bg-card p-3 text-sm outline-none focus:border-primary md:mt-5 md:p-4" />
+        <div className="mt-3 flex items-center justify-between gap-4 rounded-full bg-foreground p-2 pl-6 text-background md:mt-5">
           <span className="font-mono text-sm">KSh {total.toLocaleString()}</span>
           <a href={wa(msg)} target="_blank" rel="noreferrer" className="pill pill-primary">Send to kitchen</a>
         </div>
