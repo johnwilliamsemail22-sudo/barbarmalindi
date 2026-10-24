@@ -246,11 +246,12 @@ function BuildPlate() {
         <h2 className="mt-3 font-display text-4xl leading-[1.05] md:text-6xl">Your pizza, <em className="text-primary">your rules.</em></h2>
         <p className="mt-4 max-w-md text-muted-foreground">Start with our 48-hour dough and San Marzano base, then pick what goes on top. Anything else? Tell the kitchen.</p>
         <div className="mt-7 flex flex-wrap gap-2">
-          {toppings.map(([n, p]) => {
+          {toppings.map(({ n, p, img }) => {
             const on = sel.includes(n);
             return (
               <button key={n} type="button" onClick={() => toggle(n)} aria-pressed={on}
-                className={`rounded-full border px-4 py-2 text-sm transition-colors ${on ? "border-primary bg-primary text-primary-foreground" : "border-foreground/15 hover:border-primary"}`}>
+                className={`flex items-center gap-2 rounded-full border py-1 pl-1 pr-4 text-sm transition-all active:scale-95 ${on ? "border-primary bg-primary text-primary-foreground" : "border-foreground/15 hover:border-primary"}`}>
+                <img src={img} alt="" className="h-8 w-8 rounded-full bg-background object-contain p-0.5" />
                 {n} <span className="font-mono text-xs opacity-70">+{p}</span>
               </button>
             );
