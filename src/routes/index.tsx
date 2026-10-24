@@ -278,7 +278,7 @@ function HeartWall() {
             return (
               <span
                 key={k}
-                onPointerEnter={() => { setLit((s) => new Set(s).add(k)); setMem(memories[k % memories.length]); }}
+                onPointerEnter={() => { setLit((s) => new Set(s).add(k)); setMem(memories[k % memories.length] ?? null); }}
                 className={`h-4 w-4 rounded-full transition-all duration-500 md:h-5 md:w-5 ${l ? "bg-glow" : "bg-primary/25"}`}
                 style={l ? { boxShadow: "var(--shadow-neon)" } : undefined}
               />
