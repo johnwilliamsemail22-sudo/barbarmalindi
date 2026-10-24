@@ -30,7 +30,8 @@ export const Route = createFileRoute("/")({
 });
 
 // Placeholder contact — replace with the restaurant's real number.
-const PHONE = "+254700000000";
+const PHONE = "+254743898575";
+const PHONE_DISPLAY = "+254 743 898 575";
 
 // Photo is 382x510; the real marquee sign is centred at (191, 212) and ~250px wide.
 const IMG_W = 382, IMG_H = 510, SIGN_X = 191, SIGN_Y = 212, SIGN_W = 250;
@@ -217,7 +218,7 @@ function BuildPlate() {
   };
   const msg = `Bar Bar custom pizza: ${sel.join(", ") || "base only"}${note ? ` — Note: ${note}` : ""} (KSh ${total.toLocaleString()})`;
   return (
-    <section id="build" className="mx-auto grid max-w-6xl gap-4 px-5 py-8 md:grid-cols-[1fr_1.1fr] md:gap-10 md:py-28">
+    <section id="build" className="mx-auto grid max-w-6xl gap-3 px-5 py-6 md:grid-cols-[1fr_1.1fr] md:gap-10 md:py-28">
       <div className="relative mx-auto aspect-square w-full max-w-[300px] md:max-w-md">
         <div ref={plate} className="relative h-full w-full">
           <img src={base} alt="Your empty pizza base" className="h-full w-full object-contain drop-shadow-2xl" />
@@ -254,14 +255,14 @@ function BuildPlate() {
         <Eyebrow>Build your own</Eyebrow>
         <h2 className="mt-2 font-display text-3xl leading-[1.05] md:mt-3 md:text-6xl">Your pizza, <em className="text-primary">your rules.</em></h2>
         <p className="mt-2 hidden max-w-md text-muted-foreground md:mt-4 md:block">Start with our 48-hour dough and San Marzano base, then pick what goes on top. Anything else? Tell the kitchen.</p>
-        <div className="mt-3 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [mask-image:linear-gradient(to_right,#000_84%,transparent)] md:mt-7 md:flex-wrap md:overflow-visible md:[mask-image:none]">
+        <div className="mt-3 grid grid-cols-2 gap-2 md:mt-7 md:flex md:flex-wrap">
           {toppings.map(({ n, p, img }) => {
             const on = sel.includes(n);
             return (
               <button key={n} type="button" onClick={() => toggle(n)} aria-pressed={on}
-                className={`flex shrink-0 items-center gap-2 rounded-full border py-1 pl-1 pr-4 text-sm transition-all active:scale-95 ${on ? "border-primary bg-primary text-primary-foreground" : "border-foreground/15 hover:border-primary"}`}>
-                <img src={img} alt="" className="h-8 w-8 rounded-full bg-background object-contain p-0.5" />
-                {n} <span className="font-mono text-xs opacity-70">+{p}</span>
+                className={`flex items-center gap-2 rounded-full border py-1 pl-1 pr-3 text-xs transition-all active:scale-95 md:text-sm ${on ? "border-primary bg-primary text-primary-foreground" : "border-foreground/15 hover:border-primary"}`}>
+                <img src={img} alt="" className="h-6 w-6 shrink-0 rounded-full bg-background object-contain p-0.5 md:h-7 md:w-7" />
+                <span className="flex-1 text-left">{n}</span> <span className="font-mono text-[10px] opacity-70 md:text-xs">+{p}</span>
               </button>
             );
           })}
@@ -346,8 +347,8 @@ function Footer() {
         </div>
         <div className="text-sm leading-7">
           <h3 className="font-mono text-xs uppercase tracking-[0.25em] text-primary">Find us</h3>
-          <p>Lamu Road, Malindi, Kenya</p>
-          <a href={`tel:${PHONE}`} className="block hover:text-primary">{PHONE}</a>
+          <p>Opposite Malindi Casino, Sabaki Centre, Lamu Road, Malindi, Kenya</p>
+          <a href={`tel:${PHONE}`} className="block hover:text-primary">{PHONE_DISPLAY}</a>
           <a href={wa("Hi Bar Bar!")} target="_blank" rel="noreferrer" className="block hover:text-primary">Order on WhatsApp →</a>
         </div>
         <div className="text-sm leading-7">
