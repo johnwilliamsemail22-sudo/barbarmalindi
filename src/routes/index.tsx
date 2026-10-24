@@ -218,7 +218,7 @@ function BuildPlate() {
   };
   const msg = `Bar Bar custom pizza: ${sel.join(", ") || "base only"}${note ? ` — Note: ${note}` : ""} (KSh ${total.toLocaleString()})`;
   return (
-    <section id="build" className="mx-auto grid max-w-6xl gap-4 px-5 py-8 md:grid-cols-[1fr_1.1fr] md:gap-10 md:py-28">
+    <section id="build" className="mx-auto grid max-w-6xl gap-3 px-5 py-6 md:grid-cols-[1fr_1.1fr] md:gap-10 md:py-28">
       <div className="relative mx-auto aspect-square w-full max-w-[300px] md:max-w-md">
         <div ref={plate} className="relative h-full w-full">
           <img src={base} alt="Your empty pizza base" className="h-full w-full object-contain drop-shadow-2xl" />
