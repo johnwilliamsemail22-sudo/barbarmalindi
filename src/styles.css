@@ -142,3 +142,11 @@ body { font-family: var(--font-sans); }
 @keyframes rise { from { opacity: 0; transform: translateY(40px) } to { opacity: 1; transform: none } }
 .animate-flap { animation: flap 0.25s var(--ease-dough); }
 .animate-rise { animation: rise 1.2s var(--ease-dough) both; }
+
+@keyframes topping-drop {
+  0% { transform: translate(-50%, -50%) translateY(-220px) scale(1.8) rotate(calc(var(--r) - 120deg)); opacity: 0; filter: blur(2px); }
+  60% { opacity: 1; filter: blur(0); }
+  80% { transform: translate(-50%, -50%) translateY(4px) scale(0.92) rotate(var(--r)); }
+  100% { transform: translate(-50%, -50%) scale(1) rotate(var(--r)); opacity: 1; }
+}
+@keyframes pizza-bump { 0%,100% { transform: scale(1); } 50% { transform: scale(1.025); } }
