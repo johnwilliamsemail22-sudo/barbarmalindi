@@ -217,10 +217,18 @@ function BuildPlate() {
   };
   const msg = `Bar Bar custom pizza: ${sel.join(", ") || "base only"}${note ? ` — Note: ${note}` : ""} (KSh ${total.toLocaleString()})`;
   return (
-    <section id="build" className="mx-auto grid max-w-6xl gap-10 px-5 py-20 md:grid-cols-[1fr_1.1fr] md:py-28">
-      <div className="relative mx-auto aspect-square w-full max-w-md">
+    <section id="build" className="mx-auto grid max-w-6xl gap-5 px-5 py-12 md:grid-cols-[1fr_1.1fr] md:gap-10 md:py-28">
+      <div className="relative mx-auto aspect-square w-full max-w-[200px] md:max-w-md">
         <div ref={plate} className="relative h-full w-full">
           <img src={base} alt="Your empty pizza base" className="h-full w-full object-contain drop-shadow-2xl" />
+          {sel.length > 0 && (
+            <div aria-hidden className="pointer-events-none absolute inset-0">
+              {[0, 1, 2].map((i) => (
+                <span key={i} className="smoke-wisp absolute left-1/2 top-[38%] h-16 w-10 rounded-full bg-foreground/10 blur-md md:h-24 md:w-14"
+                  style={{ animationDelay: `${i * 1.4}s`, marginLeft: `${(i - 1) * 26}px` }} />
+              ))}
+            </div>
+          )}
           {sel.map((n) => {
             const ti = toppings.findIndex((t) => t.n === n);
             const t = toppings[ti];
