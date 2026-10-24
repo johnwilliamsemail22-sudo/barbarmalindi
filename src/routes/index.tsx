@@ -146,14 +146,14 @@ function OrbitCarousel() {
               pointerEvents: a < 0.5 ? "auto" : "none",
             }}
           >
-            <div className="relative ml-6 rounded-[28px] bg-background p-4 pl-24 text-foreground shadow-paper md:pl-32">
-              <img src={d.img} alt={d.name} width={1024} height={1024} draggable={false} className={`absolute -left-8 -top-12 w-32 origin-bottom drop-shadow-[0_22px_26px_rgba(36,32,30,0.55)] md:w-48 ${drag.current ? "" : "transition-transform duration-700 ease-[var(--ease-dough)]"}`} style={{ transform: `rotate(-8deg) scale(${a < 0.5 ? 1.08 : 0.92})` }} />
+            <div className="relative ml-6 rounded-[28px] bg-background p-4 pl-24 text-foreground shadow-paper md:pl-36">
+              <img src={d.img} alt={d.name} width={1024} height={1024} draggable={false} className={`absolute -left-8 -top-12 w-32 origin-bottom drop-shadow-[0_22px_26px_rgba(36,32,30,0.55)] md:-left-14 md:w-48 ${drag.current ? "" : "transition-transform duration-700 ease-[var(--ease-dough)]"}`} style={{ transform: `rotate(-8deg) scale(${a < 0.5 ? 1.08 : 0.92})` }} />
               <div className="flex items-start justify-between gap-2">
                 <h2 className="font-display text-lg leading-tight md:text-2xl">{d.name}</h2>
               </div>
               <p className="mt-1 font-mono text-sm font-bold text-primary">KSh {d.price.toLocaleString()}</p>
               <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{d.ingredients}</p>
-              <a href={wa(`Hi Bar Bar, I'd like to order: ${d.name}`)} target="_blank" rel="noreferrer" className="pill pill-primary mt-3 -ml-20 block w-[calc(100%+5rem)] text-center">Order now</a>
+              <a href={wa(`Hi Bar Bar, I'd like to order: ${d.name}`)} target="_blank" rel="noreferrer" className="pill pill-primary mt-3 -ml-20 block w-[calc(100%+5rem)] text-center md:-ml-32 md:w-[calc(100%+8rem)]">Order now</a>
             </div>
           </article>
         );
