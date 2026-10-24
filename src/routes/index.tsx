@@ -127,7 +127,7 @@ function OrbitCarousel() {
 
   return (
     <div
-      className="relative h-[380px] w-full touch-pan-y select-none [perspective:1100px] md:h-[400px]"
+      className="relative h-[450px] w-full touch-pan-y select-none [perspective:1100px] md:h-[540px]"
       onPointerDown={(e) => { drag.current = { x: e.clientX, start: pos }; (e.target as Element).setPointerCapture?.(e.pointerId); }}
       onPointerMove={(e) => { if (drag.current) setPos(drag.current.start - (e.clientX - drag.current.x) / 260); }}
       onPointerUp={() => { if (drag.current) snap(pos); drag.current = null; }}
@@ -156,7 +156,7 @@ function OrbitCarousel() {
               pointerEvents: a < 0.5 ? "auto" : "none",
             }}
           >
-            <div className="relative ml-6 rounded-[28px] bg-background p-5 pl-28 text-foreground shadow-paper md:pl-36">
+            <div className="relative ml-6 rounded-[28px] bg-background p-5 pl-28 pt-32 text-foreground shadow-paper md:pl-36 md:pt-40">
               <img src={d.img} alt={d.name} width={1024} height={1024} draggable={false} className={`absolute -left-6 -top-16 w-44 origin-bottom drop-shadow-[0_26px_30px_rgba(36,32,30,0.6)] md:-left-14 md:-top-12 md:w-48 ${drag.current ? "" : "transition-transform duration-700 ease-[var(--ease-dough)]"}`} style={{ transform: `rotate(-8deg) scale(${a < 0.5 ? 1.14 : 0.92})` }} />
               <div className="flex items-start justify-between gap-2">
                 <h2 className="font-display text-2xl leading-tight md:text-2xl">{d.name}</h2>
