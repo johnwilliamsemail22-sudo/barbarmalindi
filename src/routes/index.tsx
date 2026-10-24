@@ -170,10 +170,28 @@ function OrbitCarousel() {
 const wa = (t: string) => `https://wa.me/${PHONE.replace("+", "")}?text=${encodeURIComponent(t)}`;
 
 const toppings = [
-  ["Fior di latte", 200], ["Prosciutto", 350], ["Wild rocket", 120], ["Spicy salami", 300],
-  ["Coast prawns", 450], ["Mushrooms", 150], ["Chilli honey", 100], ["Olives", 120],
+  { n: "Fior di latte", p: 200, img: tMozz, count: 7, size: 17 },
+  { n: "Prosciutto", p: 350, img: tProsciutto, count: 5, size: 20 },
+  { n: "Wild rocket", p: 120, img: tRocket, count: 9, size: 16 },
+  { n: "Spicy salami", p: 300, img: tSalami, count: 8, size: 13 },
+  { n: "Coast prawns", p: 450, img: tPrawn, count: 6, size: 14 },
+  { n: "Mushrooms", p: 150, img: tMushroom, count: 8, size: 11 },
+  { n: "Chilli honey", p: 100, img: tChilli, count: 9, size: 7 },
+  { n: "Olives", p: 120, img: tOlive, count: 10, size: 7 },
 ] as const;
 const BASE = 900;
+
+// Deterministic scatter inside the sauce area, different per topping.
+function scatter(seed: number, count: number) {
+  let s = seed * 9301 + 49297;
+  const rnd = () => ((s = (s * 9301 + 49297) % 233280) / 233280);
+  return Array.from({ length: count }, (_, i) => {
+    const a = (i / count) * Math.PI * 2 + rnd() * 1.2;
+    const r = Math.sqrt(0.08 + rnd() * 0.92) * 30;
+    return { x: 50 + Math.cos(a) * r, y: 50 + Math.sin(a) * r, rot: Math.floor(rnd() * 360), d: i * 70 + rnd() * 60 };
+  });
+}
+const spots = toppings.map((t, i) => scatter(i + 3, t.count));
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary">{children}</p>;
@@ -182,18 +200,37 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
 function BuildPlate() {
   const [sel, setSel] = useState<string[]>([]);
   const [note, setNote] = useState("");
-  const total = BASE + toppings.filter(([n]) => sel.includes(n)).reduce((a, [, p]) => a + p, 0);
-  const toggle = (n: string) => setSel((s) => (s.includes(n) ? s.filter((x) => x !== n) : [...s, n]));
+  const [bump, setBump] = useState(0);
+  const total = BASE + toppings.filter((t) => sel.includes(t.n)).reduce((a, t) => a + t.p, 0);
+  const toggle = (n: string) => {
+    setSel((s) => (s.includes(n) ? s.filter((x) => x !== n) : [...s, n]));
+    setBump((b) => b + 1);
+  };
   const msg = `Bar Bar custom pizza: ${sel.join(", ") || "base only"}${note ? ` — Note: ${note}` : ""} (KSh ${total.toLocaleString()})`;
   return (
     <section id="build" className="mx-auto grid max-w-6xl gap-10 px-5 py-20 md:grid-cols-[1fr_1.1fr] md:py-28">
       <div className="relative mx-auto aspect-square w-full max-w-md">
-        <img src={pizza} alt="Your wood-fired base" className="h-full w-full object-contain drop-shadow-2xl" />
-        <div className="absolute inset-0 flex flex-wrap content-center justify-center gap-1.5 p-16">
-          {sel.map((n) => (
-            <span key={n} className="rounded-full bg-background/90 px-2.5 py-1 font-mono text-[10px] uppercase shadow-paper" style={{ animation: "rise .4s both" }}>{n}</span>
-          ))}
+        <div key={bump} className="relative h-full w-full" style={{ animation: bump ? "pizza-bump .5s .35s ease-out" : undefined }}>
+          <img src={base} alt="Your empty pizza base" className="h-full w-full object-contain drop-shadow-2xl" />
+          {sel.map((n) => {
+            const ti = toppings.findIndex((t) => t.n === n);
+            const t = toppings[ti];
+            return spots[ti].map((sp, k) => (
+              <img key={`${n}-${k}`} src={t.img} alt="" aria-hidden
+                className="pointer-events-none absolute"
+                style={{
+                  left: `${sp.x}%`, top: `${sp.y}%`, width: `${t.size}%`,
+                  ["--r" as string]: `${sp.rot}deg`,
+                  transform: `translate(-50%,-50%) rotate(${sp.rot}deg)`,
+                  filter: "drop-shadow(0 3px 3px rgb(0 0 0 / .35))",
+                  animation: `topping-drop .65s ${sp.d}ms cubic-bezier(.3,.7,.4,1) both`,
+                }} />
+            ));
+          })}
         </div>
+        {sel.length === 0 && (
+          <p className="absolute inset-x-0 -bottom-2 text-center font-mono text-[11px] uppercase tracking-[0.25em] text-muted-foreground">Empty base — tap a topping to start cooking</p>
+        )}
       </div>
       <div className="flex flex-col justify-center">
         <Eyebrow>Build your own</Eyebrow>
