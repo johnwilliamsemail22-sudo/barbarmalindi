@@ -117,7 +117,7 @@ function OrbitCarousel() {
 
   return (
     <div
-      className="relative h-[300px] w-full touch-pan-y select-none [perspective:1100px] md:h-[380px]"
+      className="relative h-[320px] w-full touch-pan-y select-none [perspective:1100px] md:h-[400px]"
       onPointerDown={(e) => { drag.current = { x: e.clientX, start: pos }; (e.target as Element).setPointerCapture?.(e.pointerId); }}
       onPointerMove={(e) => { if (drag.current) setPos(drag.current.start - (e.clientX - drag.current.x) / 260); }}
       onPointerUp={() => { if (drag.current) snap(pos); drag.current = null; }}
@@ -138,7 +138,7 @@ function OrbitCarousel() {
         return (
           <article
             key={d.name}
-            className={`absolute left-1/2 top-[56%] w-[270px] md:w-[320px] ${drag.current ? "" : "transition-all duration-700 ease-[var(--ease-dough)]"}`}
+            className={`absolute left-1/2 top-[56%] w-[292px] md:w-[344px] ${drag.current ? "" : "transition-all duration-700 ease-[var(--ease-dough)]"}`}
             style={{
               transform: `translate(-50%,-50%) translate3d(${Math.sin(angle) * radius}px, ${(1 - Math.cos(angle)) * 160}px, ${-a * 180}px) rotateY(${off * -22}deg)`,
               opacity: a > 2.2 ? 0 : 1 - a * 0.3,
@@ -147,7 +147,7 @@ function OrbitCarousel() {
             }}
           >
             <div className="relative ml-6 rounded-[28px] bg-background p-4 pl-24 text-foreground shadow-paper md:pl-32">
-              <img src={d.img} alt={d.name} width={1024} height={1024} draggable={false} className="absolute -left-8 -top-10 w-28 drop-shadow-2xl md:w-44" />
+              <img src={d.img} alt={d.name} width={1024} height={1024} draggable={false} className={`absolute -left-8 -top-12 w-32 origin-bottom drop-shadow-[0_22px_26px_rgba(36,32,30,0.55)] md:w-48 ${drag.current ? "" : "transition-transform duration-700 ease-[var(--ease-dough)]"}`} style={{ transform: `rotate(-8deg) scale(${a < 0.5 ? 1.08 : 0.92})` }} />
               <div className="flex items-start justify-between gap-2">
                 <h2 className="font-display text-lg leading-tight md:text-2xl">{d.name}</h2>
               </div>
