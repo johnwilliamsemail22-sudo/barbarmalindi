@@ -130,7 +130,7 @@ body { font-family: var(--font-sans); }
 @utility neon-text { color: var(--glow); text-shadow: var(--shadow-neon); }
 @utility pill {
   border-radius: 9999px; padding: 0.85rem 1.6rem; font-weight: 700; letter-spacing: 0.08em;
-  font-size: 0.75rem; text-transform: uppercase;
+  font-size: 0.75rem; text-transform: uppercase; white-space: nowrap;
   transition: transform 0.6s var(--ease-dough), box-shadow 0.4s var(--ease-dough);
   &:hover { transform: scale(1.07, 0.95); }
   &:active { transform: scale(0.96); }

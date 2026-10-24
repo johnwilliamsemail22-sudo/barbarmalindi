@@ -34,13 +34,15 @@ const dishes = [
 ];
 
 function useSignPosition() {
-  const [pos, setPos] = useState<{ x: number; y: number; size: number } | null>(null);
+  const [pos, setPos] = useState<{ x: number; y: number; size: number; offY: number } | null>(null);
   useEffect(() => {
     const calc = () => {
       const W = window.innerWidth, H = window.innerHeight;
       const s = Math.max(W / IMG_W, H / IMG_H);
-      const offX = (W - IMG_W * s) / 2; // object-position: center top
-      setPos({ x: offX + SIGN_X * s, y: SIGN_Y * s, size: (SIGN_W * s) / 4.2 });
+      const offX = (W - IMG_W * s) / 2;
+      // Shift the photo so the real sign sits near the top of the screen.
+      const offY = Math.min(0, Math.max(H - IMG_H * s, H * 0.16 - SIGN_Y * s));
+      setPos({ x: offX + SIGN_X * s, y: offY + SIGN_Y * s, size: (SIGN_W * s) / 4.2, offY });
     };
     calc();
     window.addEventListener("resize", calc);
@@ -62,7 +64,8 @@ function Index() {
       <img
         src={night.url}
         alt="Bar Bar Malindi at night with the lit marquee and glowing red heart"
-        className={`absolute inset-0 h-full w-full object-cover object-top transition-opacity duration-[1600ms] ${locked ? "opacity-100" : "opacity-0"}`}
+        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-[1600ms] ${locked ? "opacity-100" : "opacity-0"}`}
+        style={{ objectPosition: `50% ${pos?.offY ?? 0}px` }}
       />
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-night/20 to-night/90" />
 
@@ -95,13 +98,19 @@ function OrbitCarousel() {
   const drag = useRef<{ x: number; start: number } | null>(null);
   const wheelLock = useRef(0);
   const n = dishes.length;
+  const [radius, setRadius] = useState(420);
+  useEffect(() => {
+    const r = () => setRadius(Math.min(420, window.innerWidth * 0.62));
+    r(); window.addEventListener("resize", r);
+    return () => window.removeEventListener("resize", r);
+  }, []);
   const active = ((Math.round(pos) % n) + n) % n;
 
   const snap = (v: number) => setPos(Math.round(v));
 
   return (
     <div
-      className="relative h-[330px] w-full touch-pan-y select-none [perspective:1100px] md:h-[380px]"
+      className="relative h-[300px] w-full touch-pan-y select-none [perspective:1100px] md:h-[380px]"
       onPointerDown={(e) => { drag.current = { x: e.clientX, start: pos }; (e.target as Element).setPointerCapture?.(e.pointerId); }}
       onPointerMove={(e) => { if (drag.current) setPos(drag.current.start - (e.clientX - drag.current.x) / 260); }}
       onPointerUp={() => { if (drag.current) snap(pos); drag.current = null; }}
@@ -122,22 +131,22 @@ function OrbitCarousel() {
         return (
           <article
             key={d.name}
-            className={`absolute left-1/2 top-[58%] w-[280px] md:w-[320px] ${drag.current ? "" : "transition-all duration-700 ease-[var(--ease-dough)]"}`}
+            className={`absolute left-1/2 top-[56%] w-[270px] md:w-[320px] ${drag.current ? "" : "transition-all duration-700 ease-[var(--ease-dough)]"}`}
             style={{
-              transform: `translate(-50%,-50%) translate3d(${Math.sin(angle) * 420}px, ${(1 - Math.cos(angle)) * 160}px, ${-a * 180}px) rotateY(${off * -22}deg)`,
+              transform: `translate(-50%,-50%) translate3d(${Math.sin(angle) * radius}px, ${(1 - Math.cos(angle)) * 160}px, ${-a * 180}px) rotateY(${off * -22}deg)`,
               opacity: a > 2.2 ? 0 : 1 - a * 0.3,
               zIndex: 20 - Math.round(a * 4),
               pointerEvents: a < 0.5 ? "auto" : "none",
             }}
           >
-            <div className="relative ml-6 rounded-[28px] bg-background p-5 pl-28 text-foreground shadow-paper md:pl-32">
-              <img src={d.img} alt={d.name} width={1024} height={1024} draggable={false} className="absolute -left-10 -top-12 w-36 drop-shadow-2xl md:w-44" />
+            <div className="relative ml-6 rounded-[28px] bg-background p-4 pl-24 text-foreground shadow-paper md:pl-32">
+              <img src={d.img} alt={d.name} width={1024} height={1024} draggable={false} className="absolute -left-8 -top-10 w-28 drop-shadow-2xl md:w-44" />
               <div className="flex items-start justify-between gap-2">
-                <h2 className="font-display text-xl leading-tight md:text-2xl">{d.name}</h2>
+                <h2 className="font-display text-lg leading-tight md:text-2xl">{d.name}</h2>
               </div>
               <p className="mt-1 font-mono text-sm font-bold text-primary">KSh {d.price.toLocaleString()}</p>
               <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{d.ingredients}</p>
-              <a href={`tel:${PHONE}`} className="pill pill-primary mt-4 inline-block">Order now / Call</a>
+              <a href={`tel:${PHONE}`} className="pill pill-primary mt-3 inline-block">Order now / Call</a>
             </div>
           </article>
         );
