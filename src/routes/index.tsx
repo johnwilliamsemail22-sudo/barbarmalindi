@@ -43,7 +43,7 @@ function Hero() {
   const letters = "Bar Bar".split("");
   return (
     <section className="relative h-[100svh] min-h-[640px] overflow-hidden bg-night text-night-foreground">
-      <img src={night.url} alt="Bar Bar Malindi at night with the glowing red heart" className={`absolute inset-0 h-full w-full object-cover transition-all duration-[2000ms] ${phase === "lit" ? "scale-100 opacity-70" : "scale-110 opacity-0"}`} />
+      <img src={night.url} alt="Bar Bar Malindi at night with the glowing red heart" className={`absolute inset-0 h-full w-full object-cover transition-all duration-[2000ms] ${phase === "lit" ? "scale-100 opacity-100" : "scale-110 opacity-0"}`} />
       <div className="absolute inset-0 bg-gradient-to-t from-night via-night/30 to-night/60" />
       <header className={`absolute left-1/2 z-10 -translate-x-1/2 transition-all duration-[1400ms] ease-[var(--ease-dough)] ${phase === "lit" ? "top-6" : "top-1/2 -translate-y-1/2"}`}>
         <h1 onClick={hum} className={`font-display italic font-semibold neon-text select-none transition-all duration-[1400ms] ease-[var(--ease-dough)] ${phase === "lit" ? "text-4xl" : "text-7xl md:text-9xl"}`}>
