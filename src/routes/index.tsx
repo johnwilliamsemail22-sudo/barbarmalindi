@@ -224,7 +224,8 @@ function BuildPlate() {
           {sel.map((n) => {
             const ti = toppings.findIndex((t) => t.n === n);
             const t = toppings[ti];
-            return spots[ti].map((sp, k) => (
+            if (!t) return null;
+            return (spots[ti] ?? []).map((sp, k) => (
               <img key={`${n}-${k}`} src={t.img} alt="" aria-hidden
                 className="pointer-events-none absolute"
                 style={{
