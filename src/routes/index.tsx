@@ -250,7 +250,7 @@ function BuildPlate() {
           <p className="absolute inset-x-0 -bottom-2 text-center font-mono text-[11px] uppercase tracking-[0.25em] text-muted-foreground">Empty base — tap a topping to start cooking</p>
         )}
       </div>
-      <div className="flex flex-col justify-center">
+      <div className="flex min-w-0 flex-col justify-center">
         <Eyebrow>Build your own</Eyebrow>
         <h2 className="mt-2 font-display text-3xl leading-[1.05] md:mt-3 md:text-6xl">Your pizza, <em className="text-primary">your rules.</em></h2>
         <p className="mt-2 hidden max-w-md text-muted-foreground md:mt-4 md:block">Start with our 48-hour dough and San Marzano base, then pick what goes on top. Anything else? Tell the kitchen.</p>
