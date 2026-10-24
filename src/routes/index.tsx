@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import night from "@/assets/barbar-night.webp.asset.json";
 import pizza from "@/assets/pizza.png";
@@ -60,7 +61,8 @@ function Index() {
   }, []);
 
   return (
-    <main className="grain relative min-h-[100svh] overflow-hidden bg-night text-night-foreground">
+    <main className="grain bg-background text-foreground">
+    <section className="relative min-h-[100svh] overflow-hidden bg-night text-night-foreground">
       <img
         src={night.url}
         alt="Bar Bar Malindi at night with the lit marquee and glowing red heart"
@@ -87,8 +89,13 @@ function Index() {
 
       <div className={`relative z-10 flex min-h-[100svh] flex-col justify-end transition-all duration-1000 ease-[var(--ease-dough)] ${locked ? "translate-y-0 opacity-100 delay-700" : "translate-y-16 opacity-0"}`}>
         <OrbitCarousel />
-        <CustomOrder />
+        <a href="#build" className="mx-auto mb-5 mt-2 font-mono text-[11px] uppercase tracking-[0.25em] text-night-foreground/70">Build your own · Story · Book ↓</a>
       </div>
+    </section>
+    <BuildPlate />
+    <Story />
+    <Booking />
+    <Footer />
     </main>
   );
 }
@@ -146,7 +153,7 @@ function OrbitCarousel() {
               </div>
               <p className="mt-1 font-mono text-sm font-bold text-primary">KSh {d.price.toLocaleString()}</p>
               <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{d.ingredients}</p>
-              <a href={`tel:${PHONE}`} className="pill pill-primary mt-3 -ml-20 block w-[calc(100%+5rem)] text-center">Order now / Call</a>
+              <a href={wa(`Hi Bar Bar, I'd like to order: ${d.name}`)} target="_blank" rel="noreferrer" className="pill pill-primary mt-3 -ml-20 block w-[calc(100%+5rem)] text-center">Order now</a>
             </div>
           </article>
         );
@@ -160,25 +167,140 @@ function OrbitCarousel() {
   );
 }
 
-function CustomOrder() {
-  const [text, setText] = useState("");
+const wa = (t: string) => `https://wa.me/${PHONE.replace("+", "")}?text=${encodeURIComponent(t)}`;
+
+const toppings = [
+  ["Fior di latte", 200], ["Prosciutto", 350], ["Wild rocket", 120], ["Spicy salami", 300],
+  ["Coast prawns", 450], ["Mushrooms", 150], ["Chilli honey", 100], ["Olives", 120],
+] as const;
+const BASE = 900;
+
+function Eyebrow({ children }: { children: React.ReactNode }) {
+  return <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary">{children}</p>;
+}
+
+function BuildPlate() {
+  const [sel, setSel] = useState<string[]>([]);
+  const [note, setNote] = useState("");
+  const total = BASE + toppings.filter(([n]) => sel.includes(n)).reduce((a, [, p]) => a + p, 0);
+  const toggle = (n: string) => setSel((s) => (s.includes(n) ? s.filter((x) => x !== n) : [...s, n]));
+  const msg = `Bar Bar custom pizza: ${sel.join(", ") || "base only"}${note ? ` — Note: ${note}` : ""} (KSh ${total.toLocaleString()})`;
   return (
-    <form
-      className="mx-auto mb-5 mt-3 flex w-[min(640px,calc(100%-2rem))] items-center gap-2 rounded-full bg-background p-1.5 pl-5 text-foreground shadow-paper"
-      onSubmit={(e) => {
-        e.preventDefault();
-        if (!text.trim()) return;
-        window.open(`https://wa.me/${PHONE.replace("+", "")}?text=${encodeURIComponent(`Bar Bar order: ${text}`)}`, "_blank");
-      }}
-    >
-      <input
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        placeholder="Your own combo or request for the kitchen…"
-        aria-label="Custom order or special request"
-        className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-      />
-      <button type="submit" className="pill pill-primary shrink-0">Send</button>
-    </form>
+    <section id="build" className="mx-auto grid max-w-6xl gap-10 px-5 py-20 md:grid-cols-[1fr_1.1fr] md:py-28">
+      <div className="relative mx-auto aspect-square w-full max-w-md">
+        <img src={pizza} alt="Your wood-fired base" className="h-full w-full object-contain drop-shadow-2xl" />
+        <div className="absolute inset-0 flex flex-wrap content-center justify-center gap-1.5 p-16">
+          {sel.map((n) => (
+            <span key={n} className="rounded-full bg-background/90 px-2.5 py-1 font-mono text-[10px] uppercase shadow-paper" style={{ animation: "rise .4s both" }}>{n}</span>
+          ))}
+        </div>
+      </div>
+      <div className="flex flex-col justify-center">
+        <Eyebrow>Build your own</Eyebrow>
+        <h2 className="mt-3 font-display text-4xl leading-[1.05] md:text-6xl">Your pizza, <em className="text-primary">your rules.</em></h2>
+        <p className="mt-4 max-w-md text-muted-foreground">Start with our 48-hour dough and San Marzano base, then pick what goes on top. Anything else? Tell the kitchen.</p>
+        <div className="mt-7 flex flex-wrap gap-2">
+          {toppings.map(([n, p]) => {
+            const on = sel.includes(n);
+            return (
+              <button key={n} type="button" onClick={() => toggle(n)} aria-pressed={on}
+                className={`rounded-full border px-4 py-2 text-sm transition-colors ${on ? "border-primary bg-primary text-primary-foreground" : "border-foreground/15 hover:border-primary"}`}>
+                {n} <span className="font-mono text-xs opacity-70">+{p}</span>
+              </button>
+            );
+          })}
+        </div>
+        <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3}
+          placeholder="Any combination or request — extra crispy, no garlic, half & half…"
+          className="mt-5 w-full resize-none rounded-2xl border border-foreground/15 bg-card p-4 text-sm outline-none focus:border-primary" />
+        <div className="mt-5 flex items-center justify-between gap-4 rounded-full bg-foreground p-2 pl-6 text-background">
+          <span className="font-mono text-sm">KSh {total.toLocaleString()}</span>
+          <a href={wa(msg)} target="_blank" rel="noreferrer" className="pill pill-primary">Send to kitchen</a>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Story() {
+  return (
+    <section className="bg-night py-20 text-night-foreground md:py-28">
+      <div className="mx-auto grid max-w-6xl gap-10 px-5 md:grid-cols-12">
+        <div className="md:col-span-5">
+          <Eyebrow>The Bar Bar story</Eyebrow>
+          <h2 className="mt-3 font-display text-5xl leading-[0.95] md:text-7xl">Fire, salt air <em className="text-primary">& a red heart.</em></h2>
+          <img src={night.url} alt="Bar Bar open-air dining at night" className="mt-8 aspect-[4/5] w-full rounded-[28px] object-cover" />
+        </div>
+        <div className="space-y-10 md:col-span-6 md:col-start-7 md:pt-24">
+          <p className="font-display text-2xl leading-snug md:text-3xl">On Lamu Road, where Malindi slows down after sunset, a string of bulbs spells out two words and a heart glows over the tables.</p>
+          {[
+            ["01 — The oven", "Every pizza goes through a wood-fired oven at around 450°C. Ninety seconds, a blistered crust, a soft middle."],
+            ["02 — The coast", "Prawns, fish and lime come from the coast — cooked simply so the sea still tastes like the sea."],
+            ["03 — The open air", "No walls, no rush. Sea breeze, warm light and long tables built for friends who stay late."],
+          ].map(([t, b]) => (
+            <div key={t} className="border-t border-night-foreground/20 pt-5">
+              <h3 className="font-mono text-xs uppercase tracking-[0.25em] text-primary">{t}</h3>
+              <p className="mt-2 text-night-foreground/80">{b}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Booking() {
+  const [f, setF] = useState({ name: "", date: "", time: "19:30", guests: "2", type: "Table" });
+  const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setF({ ...f, [k]: e.target.value });
+  const msg = `Bar Bar booking — ${f.type}: ${f.name}, ${f.guests} guests, ${f.date} at ${f.time}`;
+  const field = "w-full rounded-2xl border border-foreground/15 bg-background px-4 py-3 text-sm outline-none focus:border-primary";
+  return (
+    <section id="book" className="mx-auto max-w-6xl px-5 py-20 md:py-28">
+      <div className="grid gap-10 rounded-[32px] bg-card p-6 shadow-paper md:grid-cols-2 md:p-12">
+        <div>
+          <Eyebrow>Reservations</Eyebrow>
+          <h2 className="mt-3 font-display text-4xl leading-tight md:text-5xl">Save a seat under the heart.</h2>
+          <p className="mt-4 text-muted-foreground">Tables for two, birthdays, or the whole office — party bookings of 10+ get a set menu and a reserved corner.</p>
+        </div>
+        <form className="grid grid-cols-2 gap-3" onSubmit={(e) => { e.preventDefault(); window.open(wa(msg), "_blank"); }}>
+          <div className="col-span-2 flex rounded-full bg-background p-1">
+            {["Table", "Party (10+)"].map((t) => (
+              <button key={t} type="button" onClick={() => setF({ ...f, type: t, guests: t === "Table" ? "2" : "10" })}
+                className={`flex-1 rounded-full py-2 text-sm transition-colors ${f.type === t ? "bg-foreground text-background" : ""}`}>{t}</button>
+            ))}
+          </div>
+          <input required placeholder="Your name" value={f.name} onChange={set("name")} className={`${field} col-span-2`} />
+          <input required type="date" value={f.date} onChange={set("date")} className={field} />
+          <input type="time" value={f.time} onChange={set("time")} className={field} />
+          <input type="number" min={1} value={f.guests} onChange={set("guests")} className={`${field} col-span-2`} aria-label="Guests" />
+          <button type="submit" className="pill pill-primary col-span-2 justify-center">Request booking</button>
+        </form>
+      </div>
+    </section>
+  );
+}
+
+function Footer() {
+  return (
+    <footer className="bg-night px-5 pb-10 pt-16 text-night-foreground">
+      <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-4">
+        <div className="md:col-span-2">
+          <p className="font-display text-5xl italic neon-text">Bar Bar</p>
+          <p className="mt-3 text-sm text-night-foreground/70">Restaurant & Pizzeria · Malindi</p>
+        </div>
+        <div className="text-sm leading-7">
+          <h3 className="font-mono text-xs uppercase tracking-[0.25em] text-primary">Find us</h3>
+          <p>Lamu Road, Malindi, Kenya</p>
+          <a href={`tel:${PHONE}`} className="block hover:text-primary">{PHONE}</a>
+          <a href={wa("Hi Bar Bar!")} target="_blank" rel="noreferrer" className="block hover:text-primary">Order on WhatsApp →</a>
+        </div>
+        <div className="text-sm leading-7">
+          <h3 className="font-mono text-xs uppercase tracking-[0.25em] text-primary">Hours</h3>
+          <p>Mon–Thu · 12:00–23:00</p>
+          <p>Fri–Sun · 12:00–01:00</p>
+        </div>
+      </div>
+      <p className="mx-auto mt-12 max-w-6xl border-t border-night-foreground/15 pt-6 font-mono text-[11px] text-night-foreground/50">© {new Date().getFullYear()} Bar Bar Malindi</p>
+    </footer>
   );
 }
