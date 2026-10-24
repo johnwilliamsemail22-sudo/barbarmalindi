@@ -217,8 +217,8 @@ function BuildPlate() {
   };
   const msg = `Bar Bar custom pizza: ${sel.join(", ") || "base only"}${note ? ` — Note: ${note}` : ""} (KSh ${total.toLocaleString()})`;
   return (
-    <section id="build" className="mx-auto grid max-w-6xl gap-5 px-5 py-12 md:grid-cols-[1fr_1.1fr] md:gap-10 md:py-28">
-      <div className="relative mx-auto aspect-square w-full max-w-[200px] md:max-w-md">
+    <section id="build" className="mx-auto grid max-w-6xl gap-4 px-5 py-8 md:grid-cols-[1fr_1.1fr] md:gap-10 md:py-28">
+      <div className="relative mx-auto aspect-square w-full max-w-[300px] md:max-w-md">
         <div ref={plate} className="relative h-full w-full">
           <img src={base} alt="Your empty pizza base" className="h-full w-full object-contain drop-shadow-2xl" />
           {sel.length > 0 && (
@@ -254,12 +254,12 @@ function BuildPlate() {
         <Eyebrow>Build your own</Eyebrow>
         <h2 className="mt-2 font-display text-3xl leading-[1.05] md:mt-3 md:text-6xl">Your pizza, <em className="text-primary">your rules.</em></h2>
         <p className="mt-2 hidden max-w-md text-muted-foreground md:mt-4 md:block">Start with our 48-hour dough and San Marzano base, then pick what goes on top. Anything else? Tell the kitchen.</p>
-        <div className="mt-4 flex flex-wrap gap-2 md:mt-7">
+        <div className="mt-3 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [mask-image:linear-gradient(to_right,#000_84%,transparent)] md:mt-7 md:flex-wrap md:overflow-visible md:[mask-image:none]">
           {toppings.map(({ n, p, img }) => {
             const on = sel.includes(n);
             return (
               <button key={n} type="button" onClick={() => toggle(n)} aria-pressed={on}
-                className={`flex items-center gap-2 rounded-full border py-1 pl-1 pr-4 text-sm transition-all active:scale-95 ${on ? "border-primary bg-primary text-primary-foreground" : "border-foreground/15 hover:border-primary"}`}>
+                className={`flex shrink-0 items-center gap-2 rounded-full border py-1 pl-1 pr-4 text-sm transition-all active:scale-95 ${on ? "border-primary bg-primary text-primary-foreground" : "border-foreground/15 hover:border-primary"}`}>
                 <img src={img} alt="" className="h-8 w-8 rounded-full bg-background object-contain p-0.5" />
                 {n} <span className="font-mono text-xs opacity-70">+{p}</span>
               </button>
