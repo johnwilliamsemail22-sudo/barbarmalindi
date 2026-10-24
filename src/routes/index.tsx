@@ -5,6 +5,15 @@ import night from "@/assets/barbar-night.webp.asset.json";
 import pizza from "@/assets/pizza.png";
 import cocktail from "@/assets/cocktail.png";
 import prawns from "@/assets/prawns.png";
+import base from "@/assets/base.png";
+import tMozz from "@/assets/t-mozz.png";
+import tProsciutto from "@/assets/t-prosciutto.png";
+import tRocket from "@/assets/t-rocket.png";
+import tSalami from "@/assets/t-salami.png";
+import tPrawn from "@/assets/t-prawn.png";
+import tMushroom from "@/assets/t-mushroom.png";
+import tChilli from "@/assets/t-chilli.png";
+import tOlive from "@/assets/t-olive.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -200,17 +209,17 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
 function BuildPlate() {
   const [sel, setSel] = useState<string[]>([]);
   const [note, setNote] = useState("");
-  const [bump, setBump] = useState(0);
+  const plate = useRef<HTMLDivElement>(null);
   const total = BASE + toppings.filter((t) => sel.includes(t.n)).reduce((a, t) => a + t.p, 0);
   const toggle = (n: string) => {
     setSel((s) => (s.includes(n) ? s.filter((x) => x !== n) : [...s, n]));
-    setBump((b) => b + 1);
+    plate.current?.animate([{ transform: "scale(1)" }, { transform: "scale(1.03)" }, { transform: "scale(1)" }], { duration: 450, delay: 400, easing: "ease-out" });
   };
   const msg = `Bar Bar custom pizza: ${sel.join(", ") || "base only"}${note ? ` — Note: ${note}` : ""} (KSh ${total.toLocaleString()})`;
   return (
     <section id="build" className="mx-auto grid max-w-6xl gap-10 px-5 py-20 md:grid-cols-[1fr_1.1fr] md:py-28">
       <div className="relative mx-auto aspect-square w-full max-w-md">
-        <div key={bump} className="relative h-full w-full" style={{ animation: bump ? "pizza-bump .5s .35s ease-out" : undefined }}>
+        <div ref={plate} className="relative h-full w-full">
           <img src={base} alt="Your empty pizza base" className="h-full w-full object-contain drop-shadow-2xl" />
           {sel.map((n) => {
             const ti = toppings.findIndex((t) => t.n === n);
