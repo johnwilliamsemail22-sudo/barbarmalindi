@@ -252,9 +252,9 @@ function BuildPlate() {
       </div>
       <div className="flex flex-col justify-center">
         <Eyebrow>Build your own</Eyebrow>
-        <h2 className="mt-3 font-display text-4xl leading-[1.05] md:text-6xl">Your pizza, <em className="text-primary">your rules.</em></h2>
-        <p className="mt-4 max-w-md text-muted-foreground">Start with our 48-hour dough and San Marzano base, then pick what goes on top. Anything else? Tell the kitchen.</p>
-        <div className="mt-7 flex flex-wrap gap-2">
+        <h2 className="mt-2 font-display text-3xl leading-[1.05] md:mt-3 md:text-6xl">Your pizza, <em className="text-primary">your rules.</em></h2>
+        <p className="mt-2 hidden max-w-md text-muted-foreground md:mt-4 md:block">Start with our 48-hour dough and San Marzano base, then pick what goes on top. Anything else? Tell the kitchen.</p>
+        <div className="mt-4 flex flex-wrap gap-2 md:mt-7">
           {toppings.map(({ n, p, img }) => {
             const on = sel.includes(n);
             return (
