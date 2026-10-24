@@ -146,7 +146,7 @@ function OrbitCarousel() {
               </div>
               <p className="mt-1 font-mono text-sm font-bold text-primary">KSh {d.price.toLocaleString()}</p>
               <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{d.ingredients}</p>
-              <a href={`tel:${PHONE}`} className="pill pill-primary mt-3 inline-block">Order now / Call</a>
+              <a href={`tel:${PHONE}`} className="pill pill-primary mt-3 -ml-20 block w-[calc(100%+5rem)] text-center">Order now / Call</a>
             </div>
           </article>
         );
