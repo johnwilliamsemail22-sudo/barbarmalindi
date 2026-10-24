@@ -217,10 +217,18 @@ function BuildPlate() {
   };
   const msg = `Bar Bar custom pizza: ${sel.join(", ") || "base only"}${note ? ` — Note: ${note}` : ""} (KSh ${total.toLocaleString()})`;
   return (
-    <section id="build" className="mx-auto grid max-w-6xl gap-10 px-5 py-20 md:grid-cols-[1fr_1.1fr] md:py-28">
-      <div className="relative mx-auto aspect-square w-full max-w-md">
+    <section id="build" className="mx-auto grid max-w-6xl gap-5 px-5 py-12 md:grid-cols-[1fr_1.1fr] md:gap-10 md:py-28">
+      <div className="relative mx-auto aspect-square w-full max-w-[200px] md:max-w-md">
         <div ref={plate} className="relative h-full w-full">
           <img src={base} alt="Your empty pizza base" className="h-full w-full object-contain drop-shadow-2xl" />
+          {sel.length > 0 && (
+            <div aria-hidden className="pointer-events-none absolute inset-0">
+              {[0, 1, 2].map((i) => (
+                <span key={i} className="smoke-wisp absolute left-1/2 top-[38%] h-16 w-10 rounded-full bg-foreground/10 blur-md md:h-24 md:w-14"
+                  style={{ animationDelay: `${i * 1.4}s`, marginLeft: `${(i - 1) * 26}px` }} />
+              ))}
+            </div>
+          )}
           {sel.map((n) => {
             const ti = toppings.findIndex((t) => t.n === n);
             const t = toppings[ti];
@@ -244,9 +252,9 @@ function BuildPlate() {
       </div>
       <div className="flex flex-col justify-center">
         <Eyebrow>Build your own</Eyebrow>
-        <h2 className="mt-3 font-display text-4xl leading-[1.05] md:text-6xl">Your pizza, <em className="text-primary">your rules.</em></h2>
-        <p className="mt-4 max-w-md text-muted-foreground">Start with our 48-hour dough and San Marzano base, then pick what goes on top. Anything else? Tell the kitchen.</p>
-        <div className="mt-7 flex flex-wrap gap-2">
+        <h2 className="mt-2 font-display text-3xl leading-[1.05] md:mt-3 md:text-6xl">Your pizza, <em className="text-primary">your rules.</em></h2>
+        <p className="mt-2 hidden max-w-md text-muted-foreground md:mt-4 md:block">Start with our 48-hour dough and San Marzano base, then pick what goes on top. Anything else? Tell the kitchen.</p>
+        <div className="mt-4 flex flex-wrap gap-2 md:mt-7">
           {toppings.map(({ n, p, img }) => {
             const on = sel.includes(n);
             return (
@@ -258,10 +266,10 @@ function BuildPlate() {
             );
           })}
         </div>
-        <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3}
+        <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2}
           placeholder="Any combination or request — extra crispy, no garlic, half & half…"
-          className="mt-5 w-full resize-none rounded-2xl border border-foreground/15 bg-card p-4 text-sm outline-none focus:border-primary" />
-        <div className="mt-5 flex items-center justify-between gap-4 rounded-full bg-foreground p-2 pl-6 text-background">
+          className="mt-4 w-full resize-none rounded-2xl border border-foreground/15 bg-card p-3 text-sm outline-none focus:border-primary md:mt-5 md:p-4" />
+        <div className="mt-4 flex items-center justify-between gap-4 rounded-full bg-foreground p-2 pl-6 text-background md:mt-5">
           <span className="font-mono text-sm">KSh {total.toLocaleString()}</span>
           <a href={wa(msg)} target="_blank" rel="noreferrer" className="pill pill-primary">Send to kitchen</a>
         </div>
