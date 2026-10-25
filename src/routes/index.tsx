@@ -33,7 +33,7 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-// Placeholder contact — replace with the restaurant's real number.
+// Real contact details supplied by the owner.
 const PHONE = "+254743898575";
 const PHONE_DISPLAY = "+254 743 898 575";
 
