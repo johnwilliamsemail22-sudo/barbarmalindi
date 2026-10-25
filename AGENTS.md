@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Resolve Lovable-hosted media pointers through `src/lib/assets.ts` against the verified public Lovable origin, not the current site origin, so external deployments can fetch the same media.

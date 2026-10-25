@@ -3,7 +3,7 @@ import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import { Phone } from "lucide-react";
 
-import night from "@/assets/barbar-night.webp.asset.json";
+import { venueImageUrl } from "@/lib/assets";
 import pizza from "@/assets/pizza.png";
 import cocktail from "@/assets/cocktail.png";
 import prawns from "@/assets/prawns.png";
@@ -25,7 +25,9 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "Bar Bar Malindi — Wood-Fired Pizza & Coastal Nights" },
       { property: "og:description", content: "Wood-fired pizza, coast seafood and cocktails under the glowing red heart in Malindi." },
       { property: "og:type", content: "website" },
+      { property: "og:image", content: venueImageUrl },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: venueImageUrl },
     ],
   }),
   component: Index,
@@ -76,7 +78,7 @@ function Index() {
     <main className="grain bg-background text-foreground">
     <section className="relative min-h-[100svh] overflow-hidden bg-night text-night-foreground">
       <img
-        src={night.url}
+        src={venueImageUrl}
         alt="Bar Bar Malindi at night with the lit marquee and glowing red heart"
         className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-[1600ms] ${locked ? "opacity-100" : "opacity-0"}`}
         style={{ objectPosition: `50% ${pos?.offY ?? 0}px` }}
@@ -293,7 +295,7 @@ function Story() {
         <div className="md:col-span-5">
           <Eyebrow>The Bar Bar story</Eyebrow>
           <h2 className="mt-3 font-display text-5xl leading-[0.95] md:text-7xl">Fire, salt air <em className="text-primary">& a red heart.</em></h2>
-          <img src={night.url} alt="Bar Bar open-air dining at night" className="mt-8 aspect-[4/5] w-full rounded-[28px] object-cover" />
+          <img src={venueImageUrl} alt="Bar Bar open-air dining at night" className="mt-8 aspect-[4/5] w-full rounded-[28px] object-cover" />
         </div>
         <div className="space-y-10 md:col-span-6 md:col-start-7 md:pt-24">
           <p className="font-display text-2xl leading-snug md:text-3xl">On Lamu Road, where Malindi slows down after sunset, a string of bulbs spells out two words and a heart glows over the tables.</p>
