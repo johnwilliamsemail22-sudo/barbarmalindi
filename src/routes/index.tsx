@@ -168,7 +168,7 @@ function OrbitCarousel() {
               <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground md:text-xs">{d.ingredients}</p>
               <div className="mt-4 -ml-20 flex w-[calc(100%+5rem)] items-center justify-between gap-3 md:-ml-32 md:w-[calc(100%+8rem)]">
                 <p className="font-mono text-xl font-bold text-primary md:text-2xl">KSh {d.price.toLocaleString()}</p>
-                <a href={`tel:${PHONE}`} aria-label={`Call Bar Bar to order ${d.name}`} className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-background shadow-paper transition-transform hover:scale-105 active:scale-95 md:h-14 md:w-14"><Phone className="h-5 w-5" strokeWidth={2.2} aria-hidden /></a>
+                <a href={wa(`Hi Bar Bar! I'd like to order ${d.name} — KSh ${d.price.toLocaleString()}.`)} target="_blank" rel="noreferrer" aria-label={`Order ${d.name} on WhatsApp`} className="pill pill-primary flex shrink-0 items-center gap-2 transition-transform hover:scale-[1.03] active:scale-95">Order now <Phone className="h-4 w-4" strokeWidth={2.2} aria-hidden /></a>
               </div>
 
               <a href="#book" className="mt-2 -ml-20 flex w-[calc(100%+5rem)] items-center justify-center gap-2 rounded-full border border-foreground/20 py-2.5 font-mono text-[10px] uppercase tracking-[0.25em] text-foreground transition-colors hover:border-primary hover:text-primary md:-ml-32 md:w-[calc(100%+8rem)] md:text-[11px]">Reserve a table <span aria-hidden>→</span></a>
