@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
-import { Phone } from "lucide-react";
+import { Facebook, Instagram, Phone } from "lucide-react";
 
 import { venueImageUrl } from "@/lib/assets";
 import pizza from "@/assets/pizza.png";
@@ -36,6 +36,22 @@ export const Route = createFileRoute("/")({
 // Placeholder contact — replace with the restaurant's real number.
 const PHONE = "+254743898575";
 const PHONE_DISPLAY = "+254 743 898 575";
+
+// Handles below still need the restaurant's real ones.
+function TiktokIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden className={className}>
+      <path d="M16.6 5.82A4.28 4.28 0 0 1 15.54 3h-3.09v12.4a2.59 2.59 0 1 1-2.59-2.59c.27 0 .53.04.78.12v-3.16a5.76 5.76 0 0 0-.78-.05 5.68 5.68 0 1 0 5.68 5.68V9.4a7.34 7.34 0 0 0 4.27 1.37V7.68a4.32 4.32 0 0 1-3.21-1.86Z" />
+    </svg>
+  );
+}
+
+const socials = [
+  { name: "Facebook", href: "https://www.facebook.com/barbarmalindi", Icon: Facebook },
+  { name: "Instagram", href: "https://www.instagram.com/barbarmalindi", Icon: Instagram },
+  { name: "TikTok", href: "https://www.tiktok.com/@barbarmalindi", Icon: TiktokIcon },
+];
+
 
 // Photo is 382x510; the real marquee sign is centred at (191, 212) and ~250px wide.
 const IMG_W = 382, IMG_H = 510, SIGN_X = 191, SIGN_Y = 212, SIGN_W = 250;
@@ -353,7 +369,16 @@ function Footer() {
         <div className="md:col-span-2">
           <p className="font-display text-5xl italic neon-text">Bar Bar</p>
           <p className="mt-3 text-sm text-night-foreground/70">Restaurant & Pizzeria · Malindi</p>
+          <div className="mt-6 flex gap-3">
+            {socials.map(({ name, href, Icon }) => (
+              <a key={name} href={href} target="_blank" rel="noreferrer" aria-label={`Bar Bar on ${name}`}
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-night-foreground/25 text-night-foreground/80 transition-colors hover:border-primary hover:text-primary">
+                <Icon className="h-5 w-5" />
+              </a>
+            ))}
+          </div>
         </div>
+
         <div className="text-sm leading-7">
           <h3 className="font-mono text-xs uppercase tracking-[0.25em] text-primary">Find us</h3>
           <p>Opposite Malindi Casino, Sabaki Centre, Lamu Road, Malindi, Kenya</p>
