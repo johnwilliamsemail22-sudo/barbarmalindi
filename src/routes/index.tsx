@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
+import { Phone } from "lucide-react";
+
 import night from "@/assets/barbar-night.webp.asset.json";
 import pizza from "@/assets/pizza.png";
 import cocktail from "@/assets/cocktail.png";
@@ -161,9 +163,12 @@ function OrbitCarousel() {
               <div className="flex items-start justify-between gap-2">
                 <h2 className="font-display text-2xl leading-tight md:text-2xl">{d.name}</h2>
               </div>
-              <p className="mt-1 font-mono text-base font-bold text-primary">KSh {d.price.toLocaleString()}</p>
               <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground md:text-xs">{d.ingredients}</p>
-              <a href={wa(`Hi Bar Bar, I'd like to order: ${d.name}`)} target="_blank" rel="noreferrer" className="pill pill-primary mt-3 -ml-20 block w-[calc(100%+5rem)] text-center md:-ml-32 md:w-[calc(100%+8rem)]">Order now</a>
+              <div className="mt-4 -ml-20 flex w-[calc(100%+5rem)] items-center justify-between gap-3 md:-ml-32 md:w-[calc(100%+8rem)]">
+                <p className="font-mono text-xl font-bold text-primary md:text-2xl">KSh {d.price.toLocaleString()}</p>
+                <a href={`tel:${PHONE}`} aria-label={`Call Bar Bar to order ${d.name}`} className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-background shadow-paper transition-transform hover:scale-105 active:scale-95 md:h-14 md:w-14"><Phone className="h-5 w-5" strokeWidth={2.2} aria-hidden /></a>
+              </div>
+
               <a href="#book" className="mt-2 -ml-20 flex w-[calc(100%+5rem)] items-center justify-center gap-2 rounded-full border border-foreground/20 py-2.5 font-mono text-[10px] uppercase tracking-[0.25em] text-foreground transition-colors hover:border-primary hover:text-primary md:-ml-32 md:w-[calc(100%+8rem)] md:text-[11px]">Reserve a table <span aria-hidden>→</span></a>
 
             </div>
