@@ -33,24 +33,15 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-// Placeholder contact — replace with the restaurant's real number.
+// Real contact details supplied by the owner.
 const PHONE = "+254743898575";
 const PHONE_DISPLAY = "+254 743 898 575";
 
-// Handles below still need the restaurant's real ones.
-function TiktokIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden className={className}>
-      <path d="M16.6 5.82A4.28 4.28 0 0 1 15.54 3h-3.09v12.4a2.59 2.59 0 1 1-2.59-2.59c.27 0 .53.04.78.12v-3.16a5.76 5.76 0 0 0-.78-.05 5.68 5.68 0 1 0 5.68 5.68V9.4a7.34 7.34 0 0 0 4.27 1.37V7.68a4.32 4.32 0 0 1-3.21-1.86Z" />
-    </svg>
-  );
-}
-
 const socials = [
-  { name: "Facebook", href: "https://www.facebook.com/barbarmalindi", Icon: Facebook },
-  { name: "Instagram", href: "https://www.instagram.com/barbarmalindi", Icon: Instagram },
-  { name: "TikTok", href: "https://www.tiktok.com/@barbarmalindi", Icon: TiktokIcon },
+  { name: "Facebook", href: "https://www.facebook.com/109759043924328", Icon: Facebook },
+  { name: "Instagram", href: "https://www.instagram.com/barbarofficialpage/", Icon: Instagram },
 ];
+
 
 
 // Photo is 382x510; the real marquee sign is centred at (191, 212) and ~250px wide.
