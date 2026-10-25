@@ -164,6 +164,8 @@ function OrbitCarousel() {
               <p className="mt-1 font-mono text-base font-bold text-primary">KSh {d.price.toLocaleString()}</p>
               <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground md:text-xs">{d.ingredients}</p>
               <a href={wa(`Hi Bar Bar, I'd like to order: ${d.name}`)} target="_blank" rel="noreferrer" className="pill pill-primary mt-3 -ml-20 block w-[calc(100%+5rem)] text-center md:-ml-32 md:w-[calc(100%+8rem)]">Order now</a>
+              <a href="#book" className="mt-2 -ml-20 flex w-[calc(100%+5rem)] items-center justify-center gap-2 rounded-full border border-foreground/20 py-2.5 font-mono text-[10px] uppercase tracking-[0.25em] text-foreground transition-colors hover:border-primary hover:text-primary md:-ml-32 md:w-[calc(100%+8rem)] md:text-[11px]">Reserve a table <span aria-hidden>→</span></a>
+
             </div>
           </article>
         );
