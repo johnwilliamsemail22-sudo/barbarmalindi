@@ -67,9 +67,9 @@ const dishes = [
   { name: "Chocolate Fondant", ingredients: "Warm dark chocolate cake, molten centre, vanilla cream", price: 850, img: base, keywords: "dessert chocolate cake sweet luxury" },
   { name: "Vanilla Panna Cotta", ingredients: "Vanilla bean cream, berry compote, seasonal fruit", price: 750, img: base, keywords: "dessert vanilla sweet creamy" },
   { name: "Tiramisu", ingredients: "Espresso-soaked sponge, mascarpone cream, cocoa", price: 900, img: base, keywords: "dessert coffee espresso italian sweet" },
-  { name: "Espresso", ingredients: "A short, rich shot of freshly brewed coffee", price: 300, img: cocktail, keywords: "coffee caffeine espresso hot drink" },
-  { name: "Cappuccino", ingredients: "Espresso, steamed milk, silky foam, cocoa dust", price: 400, img: cocktail, keywords: "coffee cappuccino latte milk hot drink" },
-  { name: "Iced Caramel Latte", ingredients: "Double espresso, chilled milk, caramel, ice", price: 500, img: cocktail, keywords: "coffee iced latte caramel cold drink" },
+  { name: "Espresso", ingredients: "A short, rich shot of freshly brewed coffee", price: 300, img: "https://images.rawpixel.com/image_png_social_square/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDI0LTA2L3Jhd3BpeGVsb2ZmaWNlXzMzX3Bob3RvX29mX2FfbW9kZXJuX2N1cF9vZl9ob3RfYW1lcmljYW5vX3dpdGhfYm9fM2NlZTg2ZjItNWNkNi00MTJjLThhMTEtMjgwM2E3OWRmNDJhLnBuZw.png", keywords: "coffee caffeine espresso hot drink" },
+  { name: "Cappuccino", ingredients: "Espresso, steamed milk, silky foam, cocoa dust", price: 400, img: "https://images.rawpixel.com/image_png_social_landscape/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDI0LTA3L3Jhd3BpeGVsX29mZmljZV8zM19waG90b19vZl9hX2N1cF9vZl9jYXBwdWNjaW5vX2Zyb250X3NpZGVfdmlld183ZDMxZDYwOC03N2VkLTQwOTEtODcxMS03OTNhM2I3NzBjYTcucG5n.png", keywords: "coffee cappuccino latte milk hot drink" },
+  { name: "Iced Caramel Latte", ingredients: "Double espresso, chilled milk, caramel, ice", price: 500, img: "https://images.rawpixel.com/image_png_800/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDI0LTA2L3Jhd3BpeGVsb2ZmaWNlXzNlX3Bob3RvX3Rha2VfYXdheV9pY2VkX29tYnJlX21pbGtfbGF0dGVfaXNvbGF0X2E1ZTMxMGUxLWU0OGEtNGNhNi1iNzA3LTg3OTc5Mjg5YmQyOC5wbmc.png", keywords: "coffee iced latte caramel cold drink" },
   { name: "Luxury Hot Chocolate", ingredients: "Dark chocolate, steamed milk, whipped cream", price: 450, img: base, keywords: "coffee hot chocolate cocoa warm drink" },
 ];
 
