@@ -75,6 +75,7 @@ function useSignPosition() {
 
 function Index() {
   const [locked, setLocked] = useState(false);
+  const [menuQuery, setMenuQuery] = useState("");
   const pos = useSignPosition();
   useEffect(() => {
     const t = setTimeout(() => setLocked(true), 1800);
@@ -87,7 +88,7 @@ function Index() {
       <img
         src={venueImageUrl}
         alt="Bar Bar Malindi at night with the lit marquee and glowing red heart"
-        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-[1600ms] ${locked ? "opacity-100" : "opacity-0"}`}
+        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-[700ms] ${locked ? "opacity-100" : "opacity-0"}`}
         style={{ objectPosition: `50% ${pos?.offY ?? 0}px` }}
       />
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-night/20 to-night/90" />
@@ -109,8 +110,16 @@ function Index() {
       )}
 
       <div className={`relative z-10 flex min-h-[100svh] flex-col justify-end transition-all duration-1000 ease-[var(--ease-dough)] ${locked ? "translate-y-0 opacity-100 delay-700" : "translate-y-16 opacity-0"}`}>
-        <OrbitCarousel />
-        <a href="#build" className="mx-auto mb-5 mt-2 font-mono text-[11px] uppercase tracking-[0.25em] text-night-foreground/70">Build your own · Story · Book ↓</a>
+        <OrbitCarousel query={menuQuery} />
+        <div className="mx-auto mb-5 mt-4 w-full max-w-xl px-5">
+          <label htmlFor="barbar-menu-search" className="sr-only">Search the menu</label>
+          <div className="flex items-center gap-3 rounded-full border border-night-foreground/25 bg-night/55 px-4 py-3 text-night-foreground shadow-lg backdrop-blur-md transition-colors focus-within:border-primary">
+            <Search className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+            <input id="barbar-menu-search" type="search" value={menuQuery} onChange={(event) => setMenuQuery(event.target.value)} placeholder="Search dishes, ingredients…" className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-night-foreground/65" autoComplete="off" />
+            {menuQuery && <button type="button" onClick={() => setMenuQuery("")} aria-label="Clear search" className="rounded-full p-1 text-night-foreground/70 transition-colors hover:text-primary"><X className="h-4 w-4" aria-hidden="true" /></button>}
+          </div>
+          <p className="mt-2 text-center font-mono text-[9px] uppercase tracking-[0.2em] text-night-foreground/60">Find a dish by name or ingredient</p>
+        </div>
       </div>
     </section>
     <BuildPlate />
@@ -121,102 +130,74 @@ function Index() {
   );
 }
 
-function OrbitCarousel() {
-  const [pos, setPos] = useState(0); // continuous index
-  const [query, setQuery] = useState("");
-  const filteredDishes = dishes.filter((dish) => `${dish.name} ${dish.ingredients}`.toLowerCase().includes(query.trim().toLowerCase()));
+function OrbitCarousel({ query }: { query: string }) {
+  const [pos, setPos] = useState(0);
   const drag = useRef<{ x: number; start: number } | null>(null);
   const wheelLock = useRef(0);
+  const filteredDishes = dishes.filter((dish) => `${dish.name} ${dish.ingredients}`.toLowerCase().includes(query.trim().toLowerCase()));
   const n = filteredDishes.length;
   const [radius, setRadius] = useState(420);
-  useEffect(() => {
-    const r = () => setRadius(Math.min(560, window.innerWidth * 0.85));
-    r(); window.addEventListener("resize", r);
-    return () => window.removeEventListener("resize", r);
-  }, []);
-  const active = n ? ((Math.round(pos) % n) + n) % n : 0;
 
-  const snap = (v: number) => setPos(Math.round(v));
+  useEffect(() => {
+    const resize = () => setRadius(Math.min(560, window.innerWidth * 0.85));
+    resize();
+    window.addEventListener("resize", resize);
+    return () => window.removeEventListener("resize", resize);
+  }, []);
+
+  useEffect(() => { setPos(0); }, [query]);
+  const active = n ? ((Math.round(pos) % n) + n) % n : 0;
+  const snap = (value: number) => setPos(Math.round(value));
 
   return (
     <div
       className="relative h-[450px] w-full touch-pan-y select-none [perspective:1100px] md:h-[540px]"
-      onPointerDown={(e) => { drag.current = { x: e.clientX, start: pos }; (e.target as Element).setPointerCapture?.(e.pointerId); }}
-      onPointerMove={(e) => { if (drag.current) setPos(drag.current.start - (e.clientX - drag.current.x) / 260); }}
+      onPointerDown={(event) => { drag.current = { x: event.clientX, start: pos }; }}
+      onPointerMove={(event) => { if (drag.current) setPos(drag.current.start - (event.clientX - drag.current.x) / 260); }}
       onPointerUp={() => { if (drag.current) snap(pos); drag.current = null; }}
-      onPointerCancel={() => { snap(pos); drag.current = null; }}
-      onWheel={(e) => {
-        const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+      onPointerCancel={() => { if (drag.current) snap(pos); drag.current = null; }}
+      onWheel={(event) => {
+        const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
         const now = Date.now();
-        if (Math.abs(d) < 8 || now - wheelLock.current < 450) return;
+        if (Math.abs(delta) < 8 || now - wheelLock.current < 450 || !n) return;
         wheelLock.current = now;
-        setPos((p) => Math.round(p) + (d > 0 ? 1 : -1));
+        setPos((current) => Math.round(current) + (delta > 0 ? 1 : -1));
       }}
     >
-      {filteredDishes.map((d, k) => {
-        let off = k - pos;
-        off = ((off + n / 2) % n + n) % n - n / 2;
-        const a = Math.abs(off);
-        const angle = off * 0.55; // radians along the orbit
+      {filteredDishes.map((dish, index) => {
+        let offset = index - pos;
+        offset = n ? ((offset + n / 2) % n + n) % n - n / 2 : 0;
+        const distance = Math.abs(offset);
+        const angle = offset * 0.55;
         return (
-          <article
-            key={d.name}
-            className={`absolute left-1/2 top-[56%] w-[min(88vw,360px)] md:w-[344px] ${drag.current ? "" : "transition-all duration-700 ease-[var(--ease-dough)]"}`}
+          <article key={dish.name}
+            className="absolute left-1/2 top-[56%] w-[min(88vw,360px)] md:w-[344px] transition-all duration-700 ease-[var(--ease-dough)]"
             style={{
-              transform: `translate(-50%,-50%) translate3d(${Math.sin(angle) * radius}px, ${(1 - Math.cos(angle)) * 160}px, ${-a * 180}px) rotateY(${off * -22}deg)`,
-              opacity: a > 2.2 ? 0 : 1 - a * 0.3,
-              zIndex: 20 - Math.round(a * 4),
-              pointerEvents: a < 0.5 ? "auto" : "none",
-            }}
-          >
+              transform: `translate(-50%,-50%) translate3d(${Math.sin(angle) * radius}px, ${(1 - Math.cos(angle)) * 160}px, ${-distance * 180}px) rotateY(${offset * -22}deg)`,
+              opacity: distance > 2.2 ? 0 : 1 - distance * 0.3,
+              zIndex: 20 - Math.round(distance * 4),
+              pointerEvents: distance < 0.5 ? "auto" : "none",
+            }}>
             <div className="relative ml-6 rounded-[28px] bg-background p-5 pl-28 pt-32 text-foreground shadow-paper md:pl-36 md:pt-40">
-              <img src={d.img} alt={d.name} width={1024} height={1024} draggable={false} className={`absolute -left-6 -top-16 w-44 origin-bottom drop-shadow-[0_26px_30px_rgba(36,32,30,0.6)] md:-left-14 md:-top-12 md:w-48 ${drag.current ? "" : "transition-transform duration-700 ease-[var(--ease-dough)]"}`} style={{ transform: `rotate(-8deg) scale(${a < 0.5 ? 1.14 : 0.92})` }} />
-              <div className="flex items-start justify-between gap-2">
-                <h2 className="font-display text-2xl leading-tight md:text-2xl">{d.name}</h2>
-              </div>
-              <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground md:text-xs">{d.ingredients}</p>
+              <img src={dish.img} alt={dish.name} width={1024} height={1024} draggable={false}
+                loading={distance < 1 ? "eager" : "lazy"} fetchPriority={distance < 0.5 ? "high" : "auto"} decoding="async"
+                className="absolute -left-6 -top-16 w-44 origin-bottom drop-shadow-[0_26px_30px_rgba(36,32,30,0.6)] md:-left-14 md:-top-12 md:w-48"
+                style={{ transform: `rotate(-8deg) scale(${distance < 0.5 ? 1.14 : 0.92})` }} />
+              <h2 className="font-display text-2xl leading-tight">{dish.name}</h2>
+              <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground md:text-xs">{dish.ingredients}</p>
               <div className="mt-4 -ml-20 flex w-[calc(100%+5rem)] items-center justify-between gap-3 md:-ml-32 md:w-[calc(100%+8rem)]">
-                <p className="font-mono text-xl font-bold text-primary md:text-2xl">KSh {d.price.toLocaleString()}</p>
-                <a href={wa(`Hi Bar Bar! I'd like to order ${d.name} — KSh ${d.price.toLocaleString()}.`)} target="_blank" rel="noreferrer" aria-label={`Order ${d.name} on WhatsApp`} className="pill pill-primary flex shrink-0 items-center gap-2 transition-transform hover:scale-[1.03] active:scale-95">Order now <Phone className="h-4 w-4" strokeWidth={2.2} aria-hidden /></a>
+                <p className="font-mono text-xl font-bold text-primary md:text-2xl">KSh {dish.price.toLocaleString()}</p>
+                <a href={wa(`Hi Bar Bar! I'd like to order ${dish.name} — KSh ${dish.price.toLocaleString()}.`)} target="_blank" rel="noreferrer" aria-label={`Order ${dish.name} on WhatsApp`} className="pill pill-primary flex shrink-0 items-center gap-2 transition-transform hover:scale-[1.03] active:scale-95">Order now <Phone className="h-4 w-4" strokeWidth={2.2} aria-hidden /></a>
               </div>
-
               <a href="#book" className="mt-2 -ml-20 flex w-[calc(100%+5rem)] items-center justify-center gap-2 rounded-full border border-foreground/20 py-2.5 font-mono text-[10px] uppercase tracking-[0.25em] text-foreground transition-colors hover:border-primary hover:text-primary md:-ml-32 md:w-[calc(100%+8rem)] md:text-[11px]">Reserve a table <span aria-hidden>→</span></a>
-
             </div>
           </article>
         );
       })}
+      {n === 0 && <div className="absolute inset-x-5 top-1/2 -translate-y-1/2 text-center font-mono text-xs uppercase tracking-[0.2em] text-night-foreground/70">No dishes found. Try another search.</div>}
       <div className="absolute bottom-1 left-1/2 flex -translate-x-1/2 gap-1.5">
-        {filteredDishes.map((_, k) => (
-          <span key={k} className={`h-1 rounded-full transition-all duration-500 ${k === active ? "w-6 bg-primary" : "w-2 bg-night-foreground/40"}`} />
-        ))}
-      {n === 0 && (
-        <div className="absolute inset-x-5 top-1/2 -translate-y-1/2 text-center font-mono text-xs uppercase tracking-[0.2em] text-night-foreground/70">
-          No dishes found. Try another search.
-        </div>
-      )}
-    </div>
-    <div className="relative z-30 mx-auto mt-4 max-w-xl">
-      <label htmlFor="barbar-menu-search" className="sr-only">Search the menu</label>
-      <div className="flex items-center gap-3 rounded-full border border-night-foreground/20 bg-night-foreground/10 px-4 py-3 text-night-foreground shadow-lg backdrop-blur-md transition-colors focus-within:border-primary">
-        <Search className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
-        <input
-          id="barbar-menu-search"
-          type="search"
-          value={query}
-          onChange={(event) => { setQuery(event.target.value); setPos(0); }}
-          placeholder="Search dishes, ingredients…"
-          className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-night-foreground/55"
-          autoComplete="off"
-        />
-        {query && (
-          <button type="button" onClick={() => { setQuery(""); setPos(0); }} aria-label="Clear search" className="rounded-full p-1 text-night-foreground/70 transition-colors hover:text-primary">
-            <X className="h-4 w-4" aria-hidden="true" />
-          </button>
-        )}
+        {filteredDishes.map((_, index) => <span key={index} className={`h-1 rounded-full transition-all duration-500 ${index === active ? "w-6 bg-primary" : "w-2 bg-night-foreground/40"}`} />)}
       </div>
-      <p className="mt-2 text-center font-mono text-[9px] uppercase tracking-[0.2em] text-night-foreground/50">Find a dish by name or ingredient</p>
-    </div>
     </div>
   );
 }
