@@ -48,11 +48,29 @@ const socials = [
 const IMG_W = 382, IMG_H = 510, SIGN_X = 191, SIGN_Y = 212, SIGN_W = 250;
 
 const dishes = [
-  { name: "Prosciutto & Rocket", ingredients: "San Marzano tomato, fior di latte, prosciutto crudo, wild rocket, shaved parmesan, olive oil", price: 1450, img: pizza },
-  { name: "Malindi Grilled Prawns", ingredients: "Coast tiger prawns, garlic butter, red chilli, parsley, charred lemon", price: 1850, img: prawns },
-  { name: "Passion Dawa", ingredients: "Vodka, fresh passion fruit, lime, raw honey, mint, crushed ice", price: 750, img: cocktail },
-  { name: "Diavola", ingredients: "Tomato, fior di latte, spicy salami, chilli honey, basil", price: 1350, img: pizza },
-  { name: "Sundowner Spritz", ingredients: "Bitter orange aperitivo, prosecco, soda, orange slice", price: 850, img: cocktail },
+  // Current menu items
+  { name: "Prosciutto & Rocket", ingredients: "San Marzano tomato, fior di latte, prosciutto crudo, wild rocket, shaved parmesan, olive oil", price: 1450, img: pizza, keywords: "pizza luxury italian ham arugula" },
+  { name: "Malindi Grilled Prawns", ingredients: "Coast tiger prawns, garlic butter, red chilli, parsley, charred lemon", price: 1850, img: prawns, keywords: "seafood luxury prawns shrimp coast" },
+  { name: "Passion Dawa", ingredients: "Vodka, fresh passion fruit, lime, raw honey, mint, crushed ice", price: 750, img: cocktail, keywords: "cocktail drink passion fruit dawa" },
+  { name: "Diavola", ingredients: "Tomato, fior di latte, spicy salami, chilli honey, basil", price: 1350, img: pizza, keywords: "pizza pepperoni spicy salami" },
+  { name: "Sundowner Spritz", ingredients: "Bitter orange aperitivo, prosecco, soda, orange slice", price: 850, img: cocktail, keywords: "cocktail spritz drink orange luxury" },
+
+  // Sample searchable dishes for menu discovery. These are placeholders, not confirmed menu items.
+  { name: "Truffle Mushroom Pizza", ingredients: "Wild mushrooms, mozzarella, truffle oil, thyme, parmesan", price: 1650, img: pizza, keywords: "pizza mushroom vegetarian luxury truffle" },
+  { name: "Four Cheese Pizza", ingredients: "Mozzarella, gorgonzola, parmesan, ricotta, basil", price: 1550, img: pizza, keywords: "pizza cheese cheesy vegetarian" },
+  { name: "BBQ Chicken Pizza", ingredients: "Roast chicken, smoked barbecue sauce, mozzarella, red onion", price: 1450, img: pizza, keywords: "pizza chicken barbecue bbq" },
+  { name: "Margherita Pizza", ingredients: "Tomato, fior di latte mozzarella, basil, extra virgin olive oil", price: 1150, img: pizza, keywords: "pizza vegetarian classic cheese" },
+  { name: "Seafood Linguine", ingredients: "Prawns, calamari, garlic, cherry tomato, parsley, lemon", price: 1950, img: prawns, keywords: "pasta seafood luxury prawns shrimp" },
+  { name: "Creamy Truffle Pasta", ingredients: "Fresh pasta, cream, parmesan, truffle oil, cracked black pepper", price: 1750, img: base, keywords: "pasta luxury truffle creamy italian" },
+  { name: "Grilled Lobster", ingredients: "Grilled lobster, garlic butter, herbs, charred lemon", price: 3200, img: prawns, keywords: "seafood luxury lobster shellfish" },
+  { name: "Wagyu Beef Burger", ingredients: "Premium beef, aged cheddar, caramelised onions, house sauce, brioche", price: 2250, img: base, keywords: "burger beef luxury wagyu meat" },
+  { name: "Chocolate Fondant", ingredients: "Warm dark chocolate cake, molten centre, vanilla cream", price: 850, img: base, keywords: "dessert chocolate cake sweet luxury" },
+  { name: "Vanilla Panna Cotta", ingredients: "Vanilla bean cream, berry compote, seasonal fruit", price: 750, img: base, keywords: "dessert vanilla sweet creamy" },
+  { name: "Tiramisu", ingredients: "Espresso-soaked sponge, mascarpone cream, cocoa", price: 900, img: base, keywords: "dessert coffee espresso italian sweet" },
+  { name: "Espresso", ingredients: "A short, rich shot of freshly brewed coffee", price: 300, img: cocktail, keywords: "coffee caffeine espresso hot drink" },
+  { name: "Cappuccino", ingredients: "Espresso, steamed milk, silky foam, cocoa dust", price: 400, img: cocktail, keywords: "coffee cappuccino latte milk hot drink" },
+  { name: "Iced Caramel Latte", ingredients: "Double espresso, chilled milk, caramel, ice", price: 500, img: cocktail, keywords: "coffee iced latte caramel cold drink" },
+  { name: "Luxury Hot Chocolate", ingredients: "Dark chocolate, steamed milk, whipped cream", price: 450, img: cocktail, keywords: "coffee hot chocolate cocoa warm drink" },
 ];
 
 function useSignPosition() {
@@ -135,7 +153,7 @@ function OrbitCarousel({ query }: { query: string }) {
   const [pos, setPos] = useState(0);
   const drag = useRef<{ x: number; start: number } | null>(null);
   const wheelLock = useRef(0);
-  const filteredDishes = dishes.filter((dish) => `${dish.name} ${dish.ingredients}`.toLowerCase().includes(query.trim().toLowerCase()));
+  const filteredDishes = dishes.filter((dish) => `${dish.name} ${dish.ingredients} ${"keywords" in dish ? dish.keywords : ""}`.toLowerCase().includes(query.trim().toLowerCase()));
   const n = filteredDishes.length;
   const [radius, setRadius] = useState(420);
 
