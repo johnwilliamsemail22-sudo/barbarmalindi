@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
-import { Facebook, Instagram, Phone } from "lucide-react";
+import { Facebook, Instagram, Phone, Search, X } from "lucide-react";
 
 import { venueImageUrl } from "@/lib/assets";
 import pizza from "@/assets/pizza.png";
@@ -123,16 +123,18 @@ function Index() {
 
 function OrbitCarousel() {
   const [pos, setPos] = useState(0); // continuous index
+  const [query, setQuery] = useState("");
+  const filteredDishes = dishes.filter((dish) => `${dish.name} ${dish.ingredients}`.toLowerCase().includes(query.trim().toLowerCase()));
   const drag = useRef<{ x: number; start: number } | null>(null);
   const wheelLock = useRef(0);
-  const n = dishes.length;
+  const n = filteredDishes.length;
   const [radius, setRadius] = useState(420);
   useEffect(() => {
     const r = () => setRadius(Math.min(560, window.innerWidth * 0.85));
     r(); window.addEventListener("resize", r);
     return () => window.removeEventListener("resize", r);
   }, []);
-  const active = ((Math.round(pos) % n) + n) % n;
+  const active = n ? ((Math.round(pos) % n) + n) % n : 0;
 
   const snap = (v: number) => setPos(Math.round(v));
 
@@ -151,7 +153,7 @@ function OrbitCarousel() {
         setPos((p) => Math.round(p) + (d > 0 ? 1 : -1));
       }}
     >
-      {dishes.map((d, k) => {
+      {filteredDishes.map((d, k) => {
         let off = k - pos;
         off = ((off + n / 2) % n + n) % n - n / 2;
         const a = Math.abs(off);
@@ -185,10 +187,36 @@ function OrbitCarousel() {
         );
       })}
       <div className="absolute bottom-1 left-1/2 flex -translate-x-1/2 gap-1.5">
-        {dishes.map((_, k) => (
+        {filteredDishes.map((_, k) => (
           <span key={k} className={`h-1 rounded-full transition-all duration-500 ${k === active ? "w-6 bg-primary" : "w-2 bg-night-foreground/40"}`} />
         ))}
+      {n === 0 && (
+        <div className="absolute inset-x-5 top-1/2 -translate-y-1/2 text-center font-mono text-xs uppercase tracking-[0.2em] text-night-foreground/70">
+          No dishes found. Try another search.
+        </div>
+      )}
+    </div>
+    <div className="relative z-30 mx-auto mt-4 max-w-xl">
+      <label htmlFor="barbar-menu-search" className="sr-only">Search the menu</label>
+      <div className="flex items-center gap-3 rounded-full border border-night-foreground/20 bg-night-foreground/10 px-4 py-3 text-night-foreground shadow-lg backdrop-blur-md transition-colors focus-within:border-primary">
+        <Search className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+        <input
+          id="barbar-menu-search"
+          type="search"
+          value={query}
+          onChange={(event) => { setQuery(event.target.value); setPos(0); }}
+          placeholder="Search dishes, ingredients…"
+          className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-night-foreground/55"
+          autoComplete="off"
+        />
+        {query && (
+          <button type="button" onClick={() => { setQuery(""); setPos(0); }} aria-label="Clear search" className="rounded-full p-1 text-night-foreground/70 transition-colors hover:text-primary">
+            <X className="h-4 w-4" aria-hidden="true" />
+          </button>
+        )}
       </div>
+      <p className="mt-2 text-center font-mono text-[9px] uppercase tracking-[0.2em] text-night-foreground/50">Find a dish by name or ingredient</p>
+    </div>
     </div>
   );
 }
