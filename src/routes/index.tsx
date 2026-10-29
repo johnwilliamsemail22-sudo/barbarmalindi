@@ -170,7 +170,7 @@ function OrbitCarousel({ query }: { query: string }) {
 
   return (
     <div
-      className="relative h-[820px] w-full touch-pan-y select-none [perspective:1100px] md:h-[700px]"
+      className="relative h-[660px] w-full touch-pan-y select-none [perspective:1100px] md:h-[700px]"
       onPointerDown={(event) => { drag.current = { x: event.clientX, start: pos }; }}
       onPointerMove={(event) => { if (drag.current) setPos(drag.current.start - (event.clientX - drag.current.x) / 260); }}
       onPointerUp={() => { if (drag.current) snap(pos); drag.current = null; }}
@@ -190,7 +190,7 @@ function OrbitCarousel({ query }: { query: string }) {
         const angle = offset * 0.55;
         return (
           <article key={dish.name}
-            className="absolute left-1/2 top-[56%] w-[min(88vw,360px)] md:w-[344px] transition-all duration-700 ease-[var(--ease-dough)]"
+            className="absolute left-1/2 top-[52%] w-[min(88vw,360px)] md:w-[344px] transition-all duration-700 ease-[var(--ease-dough)]"
             style={{
               transform: `translate(-50%,-50%) translate3d(${Math.sin(angle) * radius}px, ${(1 - Math.cos(angle)) * 160}px, ${-distance * 180}px) rotateY(${offset * -22}deg)`,
               opacity: distance > 2.2 ? 0 : 1 - distance * 0.3,
