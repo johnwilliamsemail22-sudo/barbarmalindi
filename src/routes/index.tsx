@@ -66,11 +66,11 @@ const dishes = [
   { name: "Wagyu Beef Burger", ingredients: "Premium beef, aged cheddar, caramelised onions, house sauce, brioche", price: 2250, img: base, keywords: "burger beef luxury wagyu meat" },
   { name: "Chocolate Fondant", ingredients: "Warm dark chocolate cake, molten centre, vanilla cream", price: 850, img: base, keywords: "dessert chocolate cake sweet luxury" },
   { name: "Vanilla Panna Cotta", ingredients: "Vanilla bean cream, berry compote, seasonal fruit", price: 750, img: base, keywords: "dessert vanilla sweet creamy" },
-  { name: "Tiramisu", ingredients: "Espresso-soaked sponge, mascarpone cream, cocoa", price: 900, img: "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?auto=format&fit=crop&w=900&q=82", keywords: "dessert coffee espresso italian sweet" },
-  { name: "Espresso", ingredients: "A short, rich shot of freshly brewed coffee", price: 300, img: "https://images.unsplash.com/photo-1510707577719-ae7c14805e76?auto=format&fit=crop&w=900&q=82", keywords: "coffee caffeine espresso hot drink" },
-  { name: "Cappuccino", ingredients: "Espresso, steamed milk, silky foam, cocoa dust", price: 400, img: "https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&w=900&q=82", keywords: "coffee cappuccino latte milk hot drink" },
-  { name: "Iced Caramel Latte", ingredients: "Double espresso, chilled milk, caramel, ice", price: 500, img: "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?auto=format&fit=crop&w=900&q=82", keywords: "coffee iced latte caramel cold drink" },
-  { name: "Luxury Hot Chocolate", ingredients: "Dark chocolate, steamed milk, whipped cream", price: 450, img: "https://images.unsplash.com/photo-1542990253-0b8be8c3d5e4?auto=format&fit=crop&w=900&q=82", keywords: "coffee hot chocolate cocoa warm drink" },
+  { name: "Tiramisu", ingredients: "Espresso-soaked sponge, mascarpone cream, cocoa", price: 900, img: base, keywords: "dessert coffee espresso italian sweet" },
+  { name: "Espresso", ingredients: "A short, rich shot of freshly brewed coffee", price: 300, img: cocktail, keywords: "coffee caffeine espresso hot drink" },
+  { name: "Cappuccino", ingredients: "Espresso, steamed milk, silky foam, cocoa dust", price: 400, img: cocktail, keywords: "coffee cappuccino latte milk hot drink" },
+  { name: "Iced Caramel Latte", ingredients: "Double espresso, chilled milk, caramel, ice", price: 500, img: cocktail, keywords: "coffee iced latte caramel cold drink" },
+  { name: "Luxury Hot Chocolate", ingredients: "Dark chocolate, steamed milk, whipped cream", price: 450, img: base, keywords: "coffee hot chocolate cocoa warm drink" },
 ];
 
 function useSignPosition() {
