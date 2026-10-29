@@ -88,6 +88,7 @@ function Index() {
       <img
         src={venueImageUrl}
         alt="Bar Bar Malindi at night with the lit marquee and glowing red heart"
+        fetchPriority="high" decoding="async" onLoad={() => setLocked(true)}
         className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-[700ms] ${locked ? "opacity-100" : "opacity-0"}`}
         style={{ objectPosition: `50% ${pos?.offY ?? 0}px` }}
       />
@@ -151,7 +152,7 @@ function OrbitCarousel({ query }: { query: string }) {
 
   return (
     <div
-      className="relative h-[450px] w-full touch-pan-y select-none [perspective:1100px] md:h-[540px]"
+      className="relative h-[820px] w-full touch-pan-y select-none [perspective:1100px] md:h-[700px]"
       onPointerDown={(event) => { drag.current = { x: event.clientX, start: pos }; }}
       onPointerMove={(event) => { if (drag.current) setPos(drag.current.start - (event.clientX - drag.current.x) / 260); }}
       onPointerUp={() => { if (drag.current) snap(pos); drag.current = null; }}
