@@ -2,20 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import { Facebook, Instagram, Phone, Search, X } from "lucide-react";
+import BuildYourPizza from "@/components/BuildYourPizza";
 
 import { venueImageUrl } from "@/lib/assets";
 import pizza from "@/assets/pizza.png";
 import cocktail from "@/assets/cocktail.png";
 import prawns from "@/assets/prawns.png";
 import base from "@/assets/base.png";
-import tMozz from "@/assets/t-mozz.png";
-import tProsciutto from "@/assets/t-prosciutto.png";
-import tRocket from "@/assets/t-rocket.png";
-import tSalami from "@/assets/t-salami.png";
-import tPrawn from "@/assets/t-prawn.png";
-import tMushroom from "@/assets/t-mushroom.png";
-import tChilli from "@/assets/t-chilli.png";
-import tOlive from "@/assets/t-olive.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -102,7 +95,7 @@ function Index() {
 
   return (
     <main className="grain bg-background text-foreground">
-    <section className="relative min-h-[100svh] overflow-hidden bg-night text-night-foreground">
+    <section id="top" className="relative min-h-[100svh] overflow-hidden bg-night text-night-foreground">
       <img
         src={venueImageUrl}
         alt="Bar Bar Malindi at night with the lit marquee and glowing red heart"
@@ -141,7 +134,7 @@ function Index() {
         </div>
       </div>
     </section>
-    <BuildPlate />
+    <BuildYourPizza />
     <Story />
     <Booking />
     <Footer />
@@ -223,104 +216,8 @@ function OrbitCarousel({ query }: { query: string }) {
 
 const wa = (t: string) => `https://wa.me/${PHONE.replace("+", "")}?text=${encodeURIComponent(t)}`;
 
-const toppings = [
-  { n: "Fior di latte", p: 200, img: tMozz, count: 7, size: 17 },
-  { n: "Prosciutto", p: 350, img: tProsciutto, count: 5, size: 20 },
-  { n: "Wild rocket", p: 120, img: tRocket, count: 9, size: 16 },
-  { n: "Spicy salami", p: 300, img: tSalami, count: 8, size: 13 },
-  { n: "Coast prawns", p: 450, img: tPrawn, count: 6, size: 14 },
-  { n: "Mushrooms", p: 150, img: tMushroom, count: 8, size: 11 },
-  { n: "Chilli honey", p: 100, img: tChilli, count: 9, size: 7 },
-  { n: "Olives", p: 120, img: tOlive, count: 10, size: 7 },
-] as const;
-const BASE = 900;
-
-// Deterministic scatter inside the sauce area, different per topping.
-function scatter(seed: number, count: number) {
-  let s = seed * 9301 + 49297;
-  const rnd = () => ((s = (s * 9301 + 49297) % 233280) / 233280);
-  return Array.from({ length: count }, (_, i) => {
-    const a = (i / count) * Math.PI * 2 + rnd() * 1.2;
-    const r = Math.sqrt(0.08 + rnd() * 0.92) * 30;
-    return { x: 50 + Math.cos(a) * r, y: 50 + Math.sin(a) * r, rot: Math.floor(rnd() * 360), d: i * 70 + rnd() * 60 };
-  });
-}
-const spots = toppings.map((t, i) => scatter(i + 3, t.count));
-
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary">{children}</p>;
-}
-
-function BuildPlate() {
-  const [sel, setSel] = useState<string[]>([]);
-  const [note, setNote] = useState("");
-  const plate = useRef<HTMLDivElement>(null);
-  const total = BASE + toppings.filter((t) => sel.includes(t.n)).reduce((a, t) => a + t.p, 0);
-  const toggle = (n: string) => {
-    setSel((s) => (s.includes(n) ? s.filter((x) => x !== n) : [...s, n]));
-    plate.current?.animate([{ transform: "scale(1)" }, { transform: "scale(1.03)" }, { transform: "scale(1)" }], { duration: 450, delay: 400, easing: "ease-out" });
-  };
-  const msg = `Bar Bar custom pizza: ${sel.join(", ") || "base only"}${note ? ` — Note: ${note}` : ""} (KSh ${total.toLocaleString()})`;
-  return (
-    <section id="build" className="mx-auto grid max-w-6xl gap-3 px-5 py-6 md:grid-cols-[1fr_1.1fr] md:gap-10 md:py-28">
-      <div className="relative mx-auto aspect-square w-full max-w-[300px] md:max-w-md">
-        <div ref={plate} className="relative h-full w-full">
-          <img src={base} alt="Your empty pizza base" className="h-full w-full object-contain drop-shadow-2xl" />
-          {sel.length > 0 && (
-            <div aria-hidden className="pointer-events-none absolute inset-0">
-              {[0, 1, 2].map((i) => (
-                <span key={i} className="smoke-wisp absolute left-1/2 top-[38%] h-16 w-10 rounded-full bg-foreground/10 blur-md md:h-24 md:w-14"
-                  style={{ animationDelay: `${i * 1.4}s`, marginLeft: `${(i - 1) * 26}px` }} />
-              ))}
-            </div>
-          )}
-          {sel.map((n) => {
-            const ti = toppings.findIndex((t) => t.n === n);
-            const t = toppings[ti];
-            if (!t) return null;
-            return (spots[ti] ?? []).map((sp, k) => (
-              <img key={`${n}-${k}`} src={t.img} alt="" aria-hidden
-                className="pointer-events-none absolute"
-                style={{
-                  left: `${sp.x}%`, top: `${sp.y}%`, width: `${t.size}%`,
-                  ["--r" as string]: `${sp.rot}deg`,
-                  transform: `translate(-50%,-50%) rotate(${sp.rot}deg)`,
-                  filter: "drop-shadow(0 3px 3px rgb(0 0 0 / .35))",
-                  animation: `topping-drop .65s ${sp.d}ms cubic-bezier(.3,.7,.4,1) both`,
-                }} />
-            ));
-          })}
-        </div>
-        {sel.length === 0 && (
-          <p className="absolute inset-x-0 -bottom-2 text-center font-mono text-[11px] uppercase tracking-[0.25em] text-muted-foreground">Empty base — tap a topping to start cooking</p>
-        )}
-      </div>
-      <div className="flex min-w-0 flex-col justify-center">
-        <Eyebrow>Build your own</Eyebrow>
-        <h2 className="mt-2 font-display text-3xl leading-[1.05] md:mt-3 md:text-6xl">Your pizza, <em className="text-primary">your rules.</em></h2>
-        <p className="mt-2 hidden max-w-md text-muted-foreground md:mt-4 md:block">Start with our 48-hour dough and San Marzano base, then pick what goes on top. Anything else? Tell the kitchen.</p>
-        <div className="mt-3 grid grid-cols-2 gap-2 md:mt-7 md:flex md:flex-wrap">
-          {toppings.map(({ n, p, img }) => {
-            const on = sel.includes(n);
-            return (
-              <button key={n} type="button" onClick={() => toggle(n)} aria-pressed={on}
-                className={`flex items-center gap-2 rounded-full border py-1 pl-1 pr-3 text-xs transition-all active:scale-95 md:text-sm ${on ? "border-primary bg-primary text-primary-foreground" : "border-foreground/15 hover:border-primary"}`}>
-                <img src={img} alt="" className="h-6 w-6 shrink-0 rounded-full bg-background object-contain p-0.5 md:h-7 md:w-7" />
-                <span className="flex-1 text-left">{n}</span> <span className="font-mono text-[10px] opacity-70 md:text-xs">+{p}</span>
-              </button>
-            );
-          })}
-        </div>
-        <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2}
-          placeholder="Any combination or request — extra crispy, no garlic, half & half…"
-          className="mt-3 w-full resize-none rounded-2xl border border-foreground/15 bg-card p-3 text-sm outline-none focus:border-primary md:mt-5 md:p-4" />
-        <div className="mt-3 flex items-center justify-between gap-4 rounded-full bg-foreground p-2 pl-6 text-background md:mt-5">
-          <span className="font-mono text-sm">KSh {total.toLocaleString()}</span>
-          <a href={wa(msg)} target="_blank" rel="noreferrer" className="pill pill-primary">Send to kitchen</a>
-        </div>
-      </div>
-    </section>
-  );
 }
 
 function Story() {
