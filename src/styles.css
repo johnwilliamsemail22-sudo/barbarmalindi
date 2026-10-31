@@ -299,6 +299,7 @@ body { font-family: var(--font-sans); }
   will-change: transform, opacity;
   -webkit-user-drag: none;
 }
+.pizza-builder__flying-topping { position: fixed; z-index: 1001; top: 0; left: 0; width: 58px; height: 58px; pointer-events: none; filter: drop-shadow(0 9px 12px rgb(0 0 0 / .42)); opacity: 0; will-change: transform, opacity; -webkit-user-drag: none; }
 .pizza-builder__status {
   display: flex;
   min-height: 24px;
@@ -512,49 +513,44 @@ body { font-family: var(--font-sans); }
   border-radius: 50%;
   animation: pizza-spin .7s linear infinite;
 }
+@property --pizza-fire-progress { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+.pizza-builder__header, .pizza-builder__dock, .pizza-builder__footer-note { transition: opacity 420ms ease, filter 420ms ease; }
 .pizza-builder__fire-ring {
-  position: absolute;
-  z-index: 0;
-  inset: -18px;
-  border: 2px solid rgb(255 112 43 / .48);
-  border-radius: 50%;
-  background: conic-gradient(from 0deg, rgb(255 84 36 / .08), rgb(255 156 45 / .86), rgb(255 69 27 / .05), rgb(255 192 75 / .8), rgb(255 84 36 / .08));
-  opacity: 0;
-  transform: scale(.89);
+  position: absolute; z-index: 0; inset: -18px; border: 2px solid rgb(255 112 43 / .22); border-radius: 50%;
+  background: conic-gradient(from -90deg, #ffd278 0deg, #ff7130 var(--pizza-fire-progress), rgb(241 90 36 / .08) var(--pizza-fire-progress), rgb(241 90 36 / .08) 360deg);
+  opacity: 0; transform: scale(.89);
   -webkit-mask: radial-gradient(circle, transparent 63%, #000 65%, #000 70%, transparent 73%);
   mask: radial-gradient(circle, transparent 63%, #000 65%, #000 70%, transparent 73%);
-  transition: opacity 500ms ease, transform 700ms cubic-bezier(.2, .8, .2, 1.3);
+  transition: opacity 500ms ease, transform 700ms cubic-bezier(.2, .8, .2, 1.3); --pizza-fire-progress: 0deg;
+}
+.pizza-builder__fire-ring::before {
+  position: absolute; inset: -13px; border-radius: 50%;
+  background: repeating-conic-gradient(from -90deg, rgb(255 207 101 / .98) 0deg 4deg, rgb(255 93 35 / .92) 4deg 8deg, transparent 8deg 16deg);
+  content: ""; filter: blur(3px); opacity: 0;
+  -webkit-mask: radial-gradient(circle, transparent 59%, #000 64%, #000 78%, transparent 85%);
+  mask: radial-gradient(circle, transparent 59%, #000 64%, #000 78%, transparent 85%);
 }
 .pizza-builder__fire-ring::after {
-  position: absolute;
-  inset: -13px;
-  border-radius: 50%;
+  position: absolute; inset: -13px; border-radius: 50%;
   background: radial-gradient(circle, transparent 58%, rgb(255 87 29 / .5) 70%, rgb(255 167 46 / .1) 79%, transparent 83%);
-  content: "";
-  filter: blur(9px);
+  content: ""; filter: blur(9px);
 }
-.pizza-builder[data-firing="true"] .pizza-builder__fire-ring {
-  opacity: 1;
-  transform: scale(1);
-  animation: pizza-fire-rotate 3.2s linear infinite, pizza-fire-pulse 1.15s ease-in-out infinite alternate;
-}
+.pizza-builder[data-firing="true"] .pizza-builder__fire-ring { opacity: 1; transform: scale(1); animation: pizza-fire-fill 8s linear forwards, pizza-fire-pulse 1.15s ease-in-out infinite alternate; }
+.pizza-builder[data-firing="true"] .pizza-builder__fire-ring::before { opacity: .9; animation: pizza-flame-flicker .34s steps(2, end) infinite alternate; }
+.pizza-builder[data-firing="true"] .pizza-builder__fire-ring::after { animation: pizza-flame-glow .72s ease-in-out infinite alternate; }
+.pizza-builder[data-firing="true"] .pizza-builder__header, .pizza-builder[data-firing="true"] .pizza-builder__dock, .pizza-builder[data-firing="true"] .pizza-builder__footer-note { filter: saturate(.48); opacity: .4; }
+.pizza-builder[data-firing="true"] .pizza-builder__pizza-stage { filter: brightness(.88) saturate(.88); }
+.pizza-builder[data-firing="true"] .pizza-builder__fire-button { animation: pizza-button-pulse 1s ease-in-out infinite alternate; }
 .pizza-builder__countdown {
-  position: absolute;
-  z-index: 4;
-  inset: 0;
-  display: grid;
-  place-items: center;
+  position: absolute; z-index: 4; inset: 0; display: grid; place-items: center; color: #fff9ef;
+  font-size: clamp(44px, 14vw, 68px); font-weight: 700; font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 28px rgb(255 108 42 / .75), 0 3px 20px rgb(0 0 0 / .66);
 }
+.pizza-builder[data-firing="true"] .pizza-builder__countdown { animation: pizza-count-pop 360ms cubic-bezier(.2, 1.35, .4, 1) both; }
 .pizza-builder__countdown-ring {
-  position: absolute;
-  width: 88px;
-  height: 88px;
-  border: 2px solid rgb(255 199 153 / .74);
-  border-right-color: transparent;
-  border-bottom-color: rgb(255 124 60 / .3);
-  border-radius: 50%;
-  box-shadow: 0 0 23px rgb(255 93 38 / .35), inset 0 0 20px rgb(255 93 38 / .14);
-  animation: pizza-spin 1.4s linear infinite;
+  position: absolute; width: 88px; height: 88px; border: 2px solid rgb(255 199 153 / .74);
+  border-right-color: transparent; border-bottom-color: rgb(255 124 60 / .3); border-radius: 50%;
+  box-shadow: 0 0 23px rgb(255 93 38 / .35), inset 0 0 20px rgb(255 93 38 / .14); animation: pizza-spin 1.4s linear infinite;
 }
 .pizza-builder__drag-preview {
   position: fixed;
@@ -570,14 +566,15 @@ body { font-family: var(--font-sans); }
   -webkit-user-drag: none;
 }
 @keyframes pizza-spin { to { transform: rotate(360deg); } }
-@keyframes pizza-fire-rotate {
-  from { transform: scale(1) rotate(0deg); filter: hue-rotate(0deg); }
-  to { transform: scale(1) rotate(360deg); filter: hue-rotate(18deg); }
-}
+@keyframes pizza-fire-fill { to { --pizza-fire-progress: 360deg; } }
 @keyframes pizza-fire-pulse {
   from { box-shadow: 0 0 12px rgb(255 83 32 / .27), 0 0 30px rgb(255 107 31 / .12); }
   to { box-shadow: 0 0 22px rgb(255 83 32 / .72), 0 0 54px rgb(255 107 31 / .4); }
 }
+@keyframes pizza-flame-flicker { from { opacity: .55; transform: scale(.99); } to { opacity: 1; transform: scale(1.035); } }
+@keyframes pizza-flame-glow { from { opacity: .65; } to { opacity: 1; } }
+@keyframes pizza-button-pulse { from { box-shadow: 0 10px 28px rgb(241 90 36 / .24), inset 0 1px rgb(255 255 255 / .13); } to { box-shadow: 0 13px 42px rgb(255 91 37 / .58), 0 0 25px rgb(255 132 51 / .24), inset 0 1px rgb(255 255 255 / .18); } }
+@keyframes pizza-count-pop { from { opacity: 0; transform: scale(.46); } to { opacity: 1; transform: scale(1); } }
 @keyframes pizza-status-pulse { 50% { opacity: .48; transform: scale(.78); } }
 @keyframes pizza-badge-pop { from { opacity: 0; transform: scale(.55); } to { opacity: 1; transform: scale(1); } }
 @media (max-height: 740px) {

@@ -23,6 +23,18 @@ type PlacedTopping = {
   width: number;
   shadowX: number;
   shadowY: number;
+  dropOffset: number;
+};
+
+type Point = { x: number; y: number };
+type AddToppingOptions = { point?: Point; origin?: Point; widthScale?: number };
+type ToppingFlight = {
+  id: number;
+  kind: ToppingId;
+  from: Point;
+  to: Point;
+  spin: number;
+  placement: PlacedTopping;
 };
 
 type Topping = {
@@ -57,11 +69,17 @@ type PointerSession = {
   pointerId: number;
   startX: number;
   startY: number;
+  originX: number;
+  originY: number;
   x: number;
   y: number;
   dragging: boolean;
   overStage: boolean;
   timer: number;
+  lastSprinkleAt: number;
+  lastSprinkleX: number;
+  lastSprinkleY: number;
+  sprinkled: boolean;
 };
 
 const SPRING_STIFFNESS = 400;
@@ -78,7 +96,13 @@ function formatPrice(cents: number) {
   }).format(cents / 100);
 }
 
-function makePlacement(kind: ToppingId, x: number, y: number): PlacedTopping {
+function makePlacement(
+  kind: ToppingId,
+  x: number,
+  y: number,
+  widthScale = 1,
+  dropOffset = 42,
+): PlacedTopping {
   const topping = TOPPINGS.find((item) => item.id === kind)!;
   return {
     id: Date.now() + Math.floor(Math.random() * 100000),
@@ -86,9 +110,10 @@ function makePlacement(kind: ToppingId, x: number, y: number): PlacedTopping {
     x,
     y,
     rotation: Math.round(Math.random() * 30 - 15),
-    width: topping.width * (0.9 + Math.random() * 0.2),
+    width: topping.width * (0.9 + Math.random() * 0.2) * widthScale,
     shadowX: Math.round(Math.random() * 2),
     shadowY: 2 + Math.round(Math.random() * 4),
+    dropOffset,
   };
 }
 
@@ -109,6 +134,19 @@ function isPointOnPizza(stage: HTMLDivElement | null, clientX: number, clientY: 
   return Math.hypot((nx - 0.5) * 2, (ny - 0.5) * 2) <= 0.91;
 }
 
+function jigglePizza(stage: HTMLDivElement | null) {
+  if (!stage || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  stage.animate(
+    [
+      { transform: "translateZ(0) scale(1)" },
+      { transform: "translateZ(0) scale(1.035)" },
+      { transform: "translateZ(0) scale(.99)" },
+      { transform: "translateZ(0) scale(1)" },
+    ],
+    { duration: 260, easing: "cubic-bezier(.2,.8,.35,1.3)" },
+  );
+}
+
 function DroppedIngredient({ placement }: { placement: PlacedTopping }) {
   const imageRef = useRef<HTMLImageElement>(null);
   const topping = TOPPINGS.find((item) => item.id === placement.kind)!;
@@ -125,7 +163,7 @@ function DroppedIngredient({ placement }: { placement: PlacedTopping }) {
 
     const started = performance.now();
     let previous = started;
-    let displacement = -42;
+    let displacement = -placement.dropOffset;
     let velocity = 0;
     let frame = 0;
 
@@ -160,8 +198,71 @@ function DroppedIngredient({ placement }: { placement: PlacedTopping }) {
         top: `${placement.y}%`,
         width: `${placement.width}%`,
         filter: `drop-shadow(${placement.shadowX}px ${placement.shadowY}px 3px rgb(0 0 0 / .36))`,
-        transform: `translate3d(-50%, -50%, 0) translate3d(0, -42px, 0) scale(.86) rotate(${placement.rotation}deg)`,
+        transform: `translate3d(-50%, -50%, 0) translate3d(0, -${placement.dropOffset}px, 0) scale(.86) rotate(${placement.rotation}deg)`,
         opacity: 0,
+      }}
+    />
+  );
+}
+
+function FlyingTopping({
+  flight,
+  onLand,
+}: {
+  flight: ToppingFlight;
+  onLand: (id: number) => void;
+}) {
+  const imageRef = useRef<HTMLImageElement>(null);
+  const onLandRef = useRef(onLand);
+  onLandRef.current = onLand;
+  const topping = TOPPINGS.find((item) => item.id === flight.kind)!;
+
+  useEffect(() => {
+    const image = imageRef.current;
+    if (!image) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      onLandRef.current(flight.id);
+      return;
+    }
+
+    const started = performance.now();
+    const duration = 350;
+    const arcHeight = 40 + Math.random() * 18;
+    const sideArc = (Math.random() - 0.5) * 22;
+    let frame = 0;
+    const animate = (now: number) => {
+      const progress = Math.min(1, (now - started) / duration);
+      const spring = 1 - Math.exp(-7.4 * progress) * Math.cos(8.4 * progress);
+      const travel = Math.max(0, Math.min(1.08, spring));
+      const arc = Math.sin(Math.PI * progress);
+      const x = flight.from.x + (flight.to.x - flight.from.x) * travel + sideArc * arc;
+      const y = flight.from.y + (flight.to.y - flight.from.y) * travel - arcHeight * arc;
+      const scale = progress === 1 ? 1 : 0.18 + 0.82 * progress + 0.62 * arc;
+      const rotation =
+        progress === 1
+          ? flight.placement.rotation
+          : flight.spin * arc + flight.placement.rotation * progress;
+      image.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) translate(-50%, -50%) scale(${scale.toFixed(3)}) rotate(${rotation.toFixed(1)}deg)`;
+      image.style.opacity = String(Math.min(1, progress * 5));
+
+      if (progress < 1) frame = requestAnimationFrame(animate);
+      else onLandRef.current(flight.id);
+    };
+
+    frame = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frame);
+  }, [flight]);
+
+  return (
+    <img
+      ref={imageRef}
+      src={topping.image}
+      alt=""
+      aria-hidden="true"
+      draggable={false}
+      className="pizza-builder__flying-topping"
+      style={{
+        transform: `translate3d(${flight.from.x}px, ${flight.from.y}px, 0) translate(-50%, -50%) scale(.18)`,
       }}
     />
   );
@@ -170,6 +271,7 @@ function DroppedIngredient({ placement }: { placement: PlacedTopping }) {
 export default function BuildYourPizza() {
   const [size, setSize] = useState<SizeId>("L");
   const [placed, setPlaced] = useState<PlacedTopping[]>([]);
+  const [flights, setFlights] = useState<ToppingFlight[]>([]);
   const [visiblePrice, setVisiblePrice] = useState(BASE_PRICE_CENTS);
   const [firing, setFiring] = useState(false);
   const [fired, setFired] = useState(false);
@@ -181,7 +283,9 @@ export default function BuildYourPizza() {
   const pointerRef = useRef<PointerSession | null>(null);
   const orderTimerRef = useRef<number | null>(null);
   const displayedPriceRef = useRef(BASE_PRICE_CENTS);
-  const addToppingRef = useRef<(kind: ToppingId, x?: number, y?: number) => void>(() => undefined);
+  const addToppingRef = useRef<(kind: ToppingId, options?: AddToppingOptions) => void>(
+    () => undefined,
+  );
 
   const basePrice = SIZES.find((candidate) => candidate.id === size)!.priceCents;
   const totalPrice =
@@ -207,11 +311,41 @@ export default function BuildYourPizza() {
     },
   );
 
-  const addTopping = (kind: ToppingId, x?: number, y?: number) => {
+  const addTopping = (kind: ToppingId, options: AddToppingOptions = {}) => {
     if (firing) return;
     if (fired) setFired(false);
-    const point = x === undefined || y === undefined ? randomSaucePoint() : { x, y };
-    setPlaced((current) => [...current, makePlacement(kind, point.x, point.y)]);
+    const point = options.point ?? randomSaucePoint();
+    const placement = makePlacement(
+      kind,
+      point.x,
+      point.y,
+      options.widthScale ?? 1,
+      options.origin ? 7 : 42,
+    );
+    const stageRect = stageRef.current?.getBoundingClientRect();
+    const origin = options.origin;
+
+    if (origin && stageRect) {
+      const target = {
+        x: stageRect.left + (stageRect.width * point.x) / 100,
+        y: stageRect.top + (stageRect.height * point.y) / 100,
+      };
+      setFlights((current) => [
+        ...current,
+        {
+          id: placement.id,
+          kind,
+          from: origin,
+          to: target,
+          spin: (Math.random() < 0.5 ? -1 : 1) * (45 + Math.random() * 45),
+          placement,
+        },
+      ]);
+      return;
+    }
+
+    setPlaced((current) => [...current, placement]);
+    jigglePizza(stageRef.current);
   };
   addToppingRef.current = addTopping;
 
@@ -269,6 +403,30 @@ export default function BuildYourPizza() {
         current.overStage = over;
         setDragOver(over);
       }
+
+      if (current.kind === "mozzarella" && over) {
+        const now = performance.now();
+        const distance = Math.hypot(
+          event.clientX - current.lastSprinkleX,
+          event.clientY - current.lastSprinkleY,
+        );
+        if (!current.sprinkled || (now - current.lastSprinkleAt >= 125 && distance >= 12)) {
+          const rect = stageRef.current?.getBoundingClientRect();
+          if (rect) {
+            addToppingRef.current(current.kind, {
+              point: {
+                x: ((event.clientX - rect.left) / rect.width) * 100,
+                y: ((event.clientY - rect.top) / rect.height) * 100,
+              },
+              widthScale: 0.58,
+            });
+            current.lastSprinkleAt = now;
+            current.lastSprinkleX = event.clientX;
+            current.lastSprinkleY = event.clientY;
+            current.sprinkled = true;
+          }
+        }
+      }
     };
 
     const finish = (event: PointerEvent) => {
@@ -280,10 +438,12 @@ export default function BuildYourPizza() {
         const rect = stageRef.current!.getBoundingClientRect();
         const x = ((event.clientX - rect.left) / rect.width) * 100;
         const y = ((event.clientY - rect.top) / rect.height) * 100;
-        addToppingRef.current(current.kind, x, y);
+        if (current.kind !== "mozzarella" || !current.sprinkled) {
+          addToppingRef.current(current.kind, { point: { x, y } });
+        }
         if (current.kind === "mozzarella") window.setTimeout(() => navigator.vibrate?.(10), 0);
       } else if (!current.dragging) {
-        addToppingRef.current(current.kind);
+        addToppingRef.current(current.kind, { origin: { x: current.originX, y: current.originY } });
       }
       setDragKind(null);
       setDragOver(false);
@@ -338,16 +498,25 @@ export default function BuildYourPizza() {
 
   const startPress = (kind: ToppingId, event: ReactPointerEvent<HTMLButtonElement>) => {
     if (event.button !== 0) return;
+    const orb = event.currentTarget
+      .querySelector(".pizza-builder__topping-orb")
+      ?.getBoundingClientRect();
     const current: PointerSession = {
       kind,
       pointerId: event.pointerId,
       startX: event.clientX,
       startY: event.clientY,
+      originX: orb ? orb.left + orb.width / 2 : event.clientX,
+      originY: orb ? orb.top + orb.height / 2 : event.clientY,
       x: event.clientX,
       y: event.clientY,
       dragging: false,
       overStage: false,
       timer: 0,
+      lastSprinkleAt: 0,
+      lastSprinkleX: event.clientX,
+      lastSprinkleY: event.clientY,
+      sprinkled: false,
     };
     current.timer = window.setTimeout(() => {
       if (pointerRef.current !== current) return;
@@ -362,7 +531,7 @@ export default function BuildYourPizza() {
   };
 
   const beginFire = () => {
-    if (firing || fired) return;
+    if (firing || fired || flights.length > 0) return;
     setFired(false);
     setFiring(true);
   };
@@ -373,9 +542,7 @@ export default function BuildYourPizza() {
   const orderText = `Hi Bar Bar! I'd like a ${size} custom pizza${toppingSummary ? ` with ${toppingSummary}` : ""}. Total: ${formatPrice(totalPrice)}.`;
   const orderUrl = `https://wa.me/${ORDER_PHONE}?text=${encodeURIComponent(orderText)}`;
   const status = firing
-    ? countdown > 7
-      ? "Wood fire, 90 seconds"
-      : "Firing at 480°"
+    ? "Wood fire, 90 seconds"
     : fired
       ? "Oven's hot. Your pizza is ready to send."
       : helperText;
@@ -435,9 +602,10 @@ export default function BuildYourPizza() {
                 <div
                   className="pizza-builder__countdown"
                   aria-live="polite"
-                  aria-label={countdown > 7 ? "Wood fire, 90 seconds" : "Firing at 480 degrees"}
+                  aria-label={`${countdown} seconds remaining`}
                 >
                   <span className="pizza-builder__countdown-ring" />
+                  <span>{countdown}</span>
                 </div>
               )}
             </div>
@@ -465,7 +633,15 @@ export default function BuildYourPizza() {
                 onPointerDown={(event) => startPress(topping.id, event)}
                 onContextMenu={(event) => event.preventDefault()}
                 onClick={(event) => {
-                  if (event.detail === 0) addTopping(topping.id);
+                  if (event.detail === 0) {
+                    const orb = event.currentTarget
+                      .querySelector(".pizza-builder__topping-orb")
+                      ?.getBoundingClientRect();
+                    const origin = orb
+                      ? { x: orb.left + orb.width / 2, y: orb.top + orb.height / 2 }
+                      : undefined;
+                    addTopping(topping.id, origin ? { origin } : {});
+                  }
                 }}
               >
                 <span className="pizza-builder__topping-orb">
@@ -498,7 +674,7 @@ export default function BuildYourPizza() {
             >
               <span className="pizza-builder__button-label">
                 <span className="pizza-builder__spinner" />
-                {countdown > 7 ? "Wood fire" : "Firing at 480°"}
+                Firing at 480°
               </span>
               <span className="pizza-builder__button-price">{formatPrice(visiblePrice)}</span>
             </button>
@@ -516,7 +692,12 @@ export default function BuildYourPizza() {
               <span className="pizza-builder__button-price">{formatPrice(visiblePrice)}</span>
             </a>
           ) : (
-            <button type="button" className="pizza-builder__fire-button" onClick={beginFire}>
+            <button
+              type="button"
+              className="pizza-builder__fire-button"
+              onClick={beginFire}
+              disabled={flights.length > 0}
+            >
               <span className="pizza-builder__button-label">
                 <Flame size={18} strokeWidth={2.3} aria-hidden="true" />
                 Fire it
@@ -529,6 +710,18 @@ export default function BuildYourPizza() {
           </span>
         </footer>
       </div>
+
+      {flights.map((flight) => (
+        <FlyingTopping
+          key={flight.id}
+          flight={flight}
+          onLand={(id) => {
+            setFlights((current) => current.filter((item) => item.id !== id));
+            setPlaced((current) => [...current, flight.placement]);
+            jigglePizza(stageRef.current);
+          }}
+        />
+      ))}
 
       {dragKind && (
         <img
