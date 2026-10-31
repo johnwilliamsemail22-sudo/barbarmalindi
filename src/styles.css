@@ -544,11 +544,6 @@ body { font-family: var(--font-sans); }
   inset: 0;
   display: grid;
   place-items: center;
-  color: #fff9ef;
-  font-size: clamp(44px, 14vw, 68px);
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  text-shadow: 0 0 28px rgb(255 108 42 / .75), 0 3px 20px rgb(0 0 0 / .66);
 }
 .pizza-builder__countdown-ring {
   position: absolute;

@@ -373,7 +373,9 @@ export default function BuildYourPizza() {
   const orderText = `Hi Bar Bar! I'd like a ${size} custom pizza${toppingSummary ? ` with ${toppingSummary}` : ""}. Total: ${formatPrice(totalPrice)}.`;
   const orderUrl = `https://wa.me/${ORDER_PHONE}?text=${encodeURIComponent(orderText)}`;
   const status = firing
-    ? "Wood fire, 90 seconds"
+    ? countdown > 7
+      ? "Wood fire, 90 seconds"
+      : "Firing at 480°"
     : fired
       ? "Oven's hot. Your pizza is ready to send."
       : helperText;
@@ -433,10 +435,9 @@ export default function BuildYourPizza() {
                 <div
                   className="pizza-builder__countdown"
                   aria-live="polite"
-                  aria-label={`${countdown} seconds remaining`}
+                  aria-label={countdown > 7 ? "Wood fire, 90 seconds" : "Firing at 480 degrees"}
                 >
                   <span className="pizza-builder__countdown-ring" />
-                  <span>{countdown}</span>
                 </div>
               )}
             </div>
@@ -497,7 +498,7 @@ export default function BuildYourPizza() {
             >
               <span className="pizza-builder__button-label">
                 <span className="pizza-builder__spinner" />
-                Firing at 480°
+                {countdown > 7 ? "Wood fire" : "Firing at 480°"}
               </span>
               <span className="pizza-builder__button-price">{formatPrice(visiblePrice)}</span>
             </button>
