@@ -40,26 +40,26 @@ type ToppingFlight = {
 type Topping = {
   id: ToppingId;
   name: string;
-  priceCents: number;
+  priceKes: number;
   image: string;
   width: number;
 };
 
 const TOPPINGS: Topping[] = [
-  { id: "pepperoni", name: "Pepperoni", priceCents: 150, image: pepperoniImage, width: 24 },
-  { id: "mushroom", name: "Mushroom", priceCents: 120, image: mushroomImage, width: 20 },
-  { id: "olives", name: "Olives", priceCents: 100, image: oliveImage, width: 18 },
-  { id: "basil", name: "Basil", priceCents: 80, image: basilImage, width: 20 },
-  { id: "peppers", name: "Peppers", priceCents: 110, image: peppersImage, width: 22 },
-  { id: "onion", name: "Red onion", priceCents: 100, image: onionImage, width: 20 },
-  { id: "tomato", name: "Tomato", priceCents: 120, image: tomatoImage, width: 19 },
-  { id: "mozzarella", name: "Mozzarella", priceCents: 170, image: mozzarellaImage, width: 21 },
+  { id: "pepperoni", name: "Pepperoni", priceKes: 100, image: pepperoniImage, width: 24 },
+  { id: "mushroom", name: "Mushroom", priceKes: 80, image: mushroomImage, width: 20 },
+  { id: "olives", name: "Olives", priceKes: 60, image: oliveImage, width: 18 },
+  { id: "basil", name: "Basil", priceKes: 40, image: basilImage, width: 20 },
+  { id: "peppers", name: "Peppers", priceKes: 70, image: peppersImage, width: 22 },
+  { id: "onion", name: "Red onion", priceKes: 60, image: onionImage, width: 20 },
+  { id: "tomato", name: "Tomato", priceKes: 80, image: tomatoImage, width: 19 },
+  { id: "mozzarella", name: "Mozzarella", priceKes: 100, image: mozzarellaImage, width: 21 },
 ];
 
 const SIZES = [
-  { id: "S", priceCents: 1100, diameter: "Small" },
-  { id: "M", priceCents: 1250, diameter: "Medium" },
-  { id: "L", priceCents: 1400, diameter: "Large" },
+  { id: "S", priceKes: 900, diameter: "Small" },
+  { id: "M", priceKes: 1000, diameter: "Medium" },
+  { id: "L", priceKes: 1100, diameter: "Large" },
 ] as const;
 
 type SizeId = (typeof SIZES)[number]["id"];
@@ -84,16 +84,12 @@ type PointerSession = {
 
 const SPRING_STIFFNESS = 400;
 const SPRING_DAMPING = 25;
-const BASE_PRICE_CENTS = 1400;
+const BASE_PRICE_KES = 1100;
+const MAX_TOTAL_KES = 2000;
 const ORDER_PHONE = "254743898575";
 
-function formatPrice(cents: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(cents / 100);
+function formatPrice(shillings: number) {
+  return `KSh ${new Intl.NumberFormat("en-KE", { maximumFractionDigits: 0 }).format(shillings)}`;
 }
 
 function makePlacement(
@@ -272,26 +268,28 @@ export default function BuildYourPizza() {
   const [size, setSize] = useState<SizeId>("L");
   const [placed, setPlaced] = useState<PlacedTopping[]>([]);
   const [flights, setFlights] = useState<ToppingFlight[]>([]);
-  const [visiblePrice, setVisiblePrice] = useState(BASE_PRICE_CENTS);
+  const [visiblePrice, setVisiblePrice] = useState(BASE_PRICE_KES);
   const [firing, setFiring] = useState(false);
+  const [priceLimitReached, setPriceLimitReached] = useState(false);
   const [fired, setFired] = useState(false);
   const [countdown, setCountdown] = useState(8);
   const [dragKind, setDragKind] = useState<ToppingId | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const stageRef = useRef<HTMLDivElement>(null);
+  const fireVideoRef = useRef<HTMLVideoElement>(null);
   const dragImageRef = useRef<HTMLImageElement>(null);
   const pointerRef = useRef<PointerSession | null>(null);
   const orderTimerRef = useRef<number | null>(null);
-  const displayedPriceRef = useRef(BASE_PRICE_CENTS);
+  const displayedPriceRef = useRef(BASE_PRICE_KES);
   const addToppingRef = useRef<(kind: ToppingId, options?: AddToppingOptions) => void>(
     () => undefined,
   );
 
-  const basePrice = SIZES.find((candidate) => candidate.id === size)!.priceCents;
+  const basePrice = SIZES.find((candidate) => candidate.id === size)!.priceKes;
   const totalPrice =
     basePrice +
     placed.reduce((sum, piece) => {
-      return sum + TOPPINGS.find((topping) => topping.id === piece.kind)!.priceCents;
+      return sum + TOPPINGS.find((topping) => topping.id === piece.kind)!.priceKes;
     }, 0);
 
   const counts = TOPPINGS.reduce<Record<ToppingId, number>>(
@@ -313,7 +311,14 @@ export default function BuildYourPizza() {
 
   const addTopping = (kind: ToppingId, options: AddToppingOptions = {}) => {
     if (firing) return;
+    const topping = TOPPINGS.find((item) => item.id === kind)!;
+    if (totalPrice + topping.priceKes > MAX_TOTAL_KES) {
+      setPriceLimitReached(true);
+      return;
+    }
+    setPriceLimitReached(totalPrice + topping.priceKes >= MAX_TOTAL_KES);
     if (fired) setFired(false);
+
     const point = options.point ?? randomSaucePoint();
     const placement = makePlacement(
       kind,
@@ -322,6 +327,7 @@ export default function BuildYourPizza() {
       options.widthScale ?? 1,
       options.origin ? 7 : 42,
     );
+    setPlaced((current) => [...current, placement]);
     const stageRect = stageRef.current?.getBoundingClientRect();
     const origin = options.origin;
 
@@ -344,7 +350,6 @@ export default function BuildYourPizza() {
       return;
     }
 
-    setPlaced((current) => [...current, placement]);
     jigglePizza(stageRef.current);
   };
   addToppingRef.current = addTopping;
@@ -378,6 +383,18 @@ export default function BuildYourPizza() {
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
   }, [totalPrice]);
+
+  useEffect(() => {
+    const video = fireVideoRef.current;
+    if (!video) return;
+    if (firing) {
+      video.currentTime = 0;
+      void video.play().catch(() => undefined);
+      return;
+    }
+    video.pause();
+    if (video.readyState > 0) video.currentTime = 0;
+  }, [firing]);
 
   useEffect(() => {
     const move = (event: PointerEvent) => {
@@ -545,7 +562,9 @@ export default function BuildYourPizza() {
     ? "Wood fire, 90 seconds"
     : fired
       ? "Oven's hot. Your pizza is ready to send."
-      : helperText;
+      : priceLimitReached
+        ? `Maximum total ${formatPrice(MAX_TOTAL_KES)} reached. Choose a smaller size to keep building.`
+        : helperText;
 
   return (
     <section id="build" className="pizza-builder" data-firing={firing} data-drop-ready={dragOver}>
@@ -569,11 +588,17 @@ export default function BuildYourPizza() {
               <button
                 key={candidate.id}
                 type="button"
-                disabled={firing}
+                disabled={firing || flights.length > 0}
                 aria-pressed={size === candidate.id}
                 aria-label={`${candidate.diameter} size`}
                 onClick={() => {
+                  const nextTotal = candidate.priceKes + (totalPrice - basePrice);
+                  if (nextTotal > MAX_TOTAL_KES) {
+                    setPriceLimitReached(true);
+                    return;
+                  }
                   setSize(candidate.id);
+                  setPriceLimitReached(nextTotal >= MAX_TOTAL_KES);
                   setFired(false);
                 }}
                 className="pizza-builder__size"
@@ -586,7 +611,7 @@ export default function BuildYourPizza() {
         </header>
 
         <div className="pizza-builder__stage-area">
-          <div className="pizza-builder__stage-frame">
+          <div className="pizza-builder__stage-frame" data-size={size}>
             <div className="pizza-builder__fire-ring" aria-hidden="true" />
             <div ref={stageRef} className="pizza-builder__pizza-stage" data-drop-ready={dragOver}>
               <img
@@ -595,9 +620,11 @@ export default function BuildYourPizza() {
                 className="pizza-builder__base"
                 draggable={false}
               />
-              {placed.map((piece) => (
-                <DroppedIngredient key={piece.id} placement={piece} />
-              ))}
+              {placed
+                .filter((piece) => !flights.some((flight) => flight.id === piece.id))
+                .map((piece) => (
+                  <DroppedIngredient key={piece.id} placement={piece} />
+                ))}
               {firing && (
                 <div
                   className="pizza-builder__countdown"
@@ -627,7 +654,7 @@ export default function BuildYourPizza() {
                 key={topping.id}
                 type="button"
                 disabled={firing}
-                aria-label={`${topping.name}, ${formatPrice(topping.priceCents)} each${counts[topping.id] ? `, added ${counts[topping.id]} times` : ""}. Tap to add or hold and drag.`}
+                aria-label={`${topping.name}, ${formatPrice(topping.priceKes)} each${counts[topping.id] ? `, added ${counts[topping.id]} times` : ""}. Tap to add or hold and drag.`}
                 aria-pressed={counts[topping.id] > 0}
                 className="pizza-builder__topping"
                 onPointerDown={(event) => startPress(topping.id, event)}
@@ -657,7 +684,7 @@ export default function BuildYourPizza() {
                 </span>
                 <span className="pizza-builder__topping-name">{topping.name}</span>
                 <span className="pizza-builder__topping-price">
-                  +{formatPrice(topping.priceCents)}
+                  +{formatPrice(topping.priceKes)}
                 </span>
               </button>
             ))}
@@ -711,13 +738,24 @@ export default function BuildYourPizza() {
         </footer>
       </div>
 
+      <div className="pizza-builder__fire-backdrop" aria-hidden="true">
+        <video
+          ref={fireVideoRef}
+          className="pizza-builder__fire-video"
+          src="/oven-fire-loop.mp4"
+          autoPlay={firing}
+          loop
+          muted
+          playsInline
+          preload={firing ? "auto" : "none"}
+        />
+      </div>
       {flights.map((flight) => (
         <FlyingTopping
           key={flight.id}
           flight={flight}
           onLand={(id) => {
             setFlights((current) => current.filter((item) => item.id !== id));
-            setPlaced((current) => [...current, flight.placement]);
             jigglePizza(stageRef.current);
           }}
         />
