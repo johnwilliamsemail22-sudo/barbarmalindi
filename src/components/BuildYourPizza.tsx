@@ -27,13 +27,15 @@ type PlacedTopping = {
 };
 
 type Point = { x: number; y: number };
-type AddToppingOptions = { point?: Point; origin?: Point; widthScale?: number };
+type AddToppingOptions = { point?: Point; origin?: Point; widthScale?: number; count?: number };
 type ToppingFlight = {
   id: number;
   kind: ToppingId;
   from: Point;
   to: Point;
   spin: number;
+  delay: number;
+  batchFinal: boolean;
   placement: PlacedTopping;
 };
 
@@ -41,19 +43,48 @@ type Topping = {
   id: ToppingId;
   name: string;
   priceKes: number;
+  piecesPerTap: number;
   image: string;
   width: number;
 };
 
 const TOPPINGS: Topping[] = [
-  { id: "pepperoni", name: "Pepperoni", priceKes: 100, image: pepperoniImage, width: 24 },
-  { id: "mushroom", name: "Mushroom", priceKes: 80, image: mushroomImage, width: 20 },
-  { id: "olives", name: "Olives", priceKes: 60, image: oliveImage, width: 18 },
-  { id: "basil", name: "Basil", priceKes: 40, image: basilImage, width: 20 },
-  { id: "peppers", name: "Peppers", priceKes: 70, image: peppersImage, width: 22 },
-  { id: "onion", name: "Red onion", priceKes: 60, image: onionImage, width: 20 },
-  { id: "tomato", name: "Tomato", priceKes: 80, image: tomatoImage, width: 19 },
-  { id: "mozzarella", name: "Mozzarella", priceKes: 100, image: mozzarellaImage, width: 21 },
+  {
+    id: "pepperoni",
+    name: "Pepperoni",
+    priceKes: 100,
+    piecesPerTap: 12,
+    image: pepperoniImage,
+    width: 24,
+  },
+  {
+    id: "mushroom",
+    name: "Mushroom",
+    priceKes: 80,
+    piecesPerTap: 10,
+    image: mushroomImage,
+    width: 20,
+  },
+  { id: "olives", name: "Olives", priceKes: 60, piecesPerTap: 14, image: oliveImage, width: 18 },
+  { id: "basil", name: "Basil", priceKes: 40, piecesPerTap: 10, image: basilImage, width: 20 },
+  {
+    id: "peppers",
+    name: "Peppers",
+    priceKes: 70,
+    piecesPerTap: 10,
+    image: peppersImage,
+    width: 22,
+  },
+  { id: "onion", name: "Red onion", priceKes: 60, piecesPerTap: 10, image: onionImage, width: 20 },
+  { id: "tomato", name: "Tomato", priceKes: 80, piecesPerTap: 10, image: tomatoImage, width: 19 },
+  {
+    id: "mozzarella",
+    name: "Mozzarella",
+    priceKes: 100,
+    piecesPerTap: 12,
+    image: mozzarellaImage,
+    width: 21,
+  },
 ];
 
 const SIZES = [
@@ -85,6 +116,7 @@ type PointerSession = {
 const SPRING_STIFFNESS = 400;
 const SPRING_DAMPING = 25;
 const BASE_PRICE_KES = 1100;
+const BATCH_PIECE_SCALE = 1.35;
 const ORDER_PHONE = "254743898575";
 
 function playOneShot(sound: HTMLAudioElement | null) {
@@ -106,6 +138,8 @@ function formatPrice(shillings: number) {
   return `KSh ${new Intl.NumberFormat("en-KE", { maximumFractionDigits: 0 }).format(shillings)}`;
 }
 
+let placementIdSequence = 0;
+
 function makePlacement(
   kind: ToppingId,
   x: number,
@@ -115,7 +149,7 @@ function makePlacement(
 ): PlacedTopping {
   const topping = TOPPINGS.find((item) => item.id === kind)!;
   return {
-    id: Date.now() + Math.floor(Math.random() * 100000),
+    id: ++placementIdSequence,
     kind,
     x,
     y,
@@ -134,6 +168,19 @@ function randomSaucePoint() {
     x: 50 + Math.cos(angle) * radius,
     y: 50 + Math.sin(angle) * radius,
   };
+}
+
+function randomSauceScatter(count: number) {
+  const rotation = Math.random() * Math.PI * 2;
+  const sector = (Math.PI * 2) / count;
+  return Array.from({ length: count }, (_, index) => {
+    const angle = rotation + sector * index + (Math.random() - 0.5) * sector * 0.28;
+    const radius = Math.sqrt(0.08 + Math.random() * 0.84) * 31;
+    return {
+      x: 50 + Math.cos(angle) * radius,
+      y: 50 + Math.sin(angle) * radius,
+    };
+  });
 }
 
 function isPointOnPizza(stage: HTMLDivElement | null, clientX: number, clientY: number) {
@@ -235,11 +282,12 @@ function FlyingTopping({
       return;
     }
 
-    const started = performance.now();
+    let started = 0;
     const duration = 350;
     const arcHeight = 40 + Math.random() * 18;
     const sideArc = (Math.random() - 0.5) * 22;
     let frame = 0;
+    let timer = 0;
     const animate = (now: number) => {
       const progress = Math.min(1, (now - started) / duration);
       const spring = 1 - Math.exp(-7.4 * progress) * Math.cos(8.4 * progress);
@@ -259,8 +307,16 @@ function FlyingTopping({
       else onLandRef.current(flight.id);
     };
 
-    frame = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(frame);
+    const start = () => {
+      started = performance.now();
+      frame = requestAnimationFrame(animate);
+    };
+    if (flight.delay > 0) timer = window.setTimeout(start, flight.delay);
+    else start();
+    return () => {
+      window.clearTimeout(timer);
+      cancelAnimationFrame(frame);
+    };
   }, [flight]);
 
   return (
@@ -349,37 +405,40 @@ export default function BuildYourPizza() {
     if (firing) return;
     if (fired) setFired(false);
 
-    const point = options.point ?? randomSaucePoint();
-    const placement = makePlacement(
-      kind,
-      point.x,
-      point.y,
-      options.widthScale ?? 1,
-      options.origin ? 7 : 42,
+    const count = options.count ?? 1;
+    const points = count > 1 ? randomSauceScatter(count) : [options.point ?? randomSaucePoint()];
+    const widthScale = options.widthScale ?? (count > 1 ? BATCH_PIECE_SCALE : 1);
+    const placements = points.map((point) =>
+      makePlacement(kind, point.x, point.y, widthScale, options.origin ? 7 : 42),
     );
-    setPlaced((current) => [...current, placement]);
     const stageRect = stageRef.current?.getBoundingClientRect();
     const origin = options.origin;
 
     if (origin && stageRect) {
-      const target = {
-        x: stageRect.left + (stageRect.width * point.x) / 100,
-        y: stageRect.top + (stageRect.height * point.y) / 100,
-      };
-      setFlights((current) => [
-        ...current,
-        {
-          id: placement.id,
-          kind,
-          from: origin,
-          to: target,
-          spin: (Math.random() < 0.5 ? -1 : 1) * (45 + Math.random() * 45),
-          placement,
-        },
-      ]);
+      const burst = placements.flatMap((placement, index) => {
+        const point = points[index];
+        if (!point) return [];
+        return [
+          {
+            id: placement.id,
+            kind,
+            from: origin,
+            to: {
+              x: stageRect.left + (stageRect.width * point.x) / 100,
+              y: stageRect.top + (stageRect.height * point.y) / 100,
+            },
+            spin: (Math.random() < 0.5 ? -1 : 1) * (45 + Math.random() * 45),
+            delay: index * 48 + Math.random() * 24,
+            batchFinal: index === placements.length - 1,
+            placement,
+          },
+        ];
+      });
+      setFlights((current) => [...current, ...burst]);
       return;
     }
 
+    setPlaced((current) => [...current, ...placements]);
     jigglePizza(stageRef.current);
   };
   addToppingRef.current = addTopping;
@@ -491,7 +550,11 @@ export default function BuildYourPizza() {
         playNextOneShot(toppingAudioPoolRef.current, toppingAudioCursorRef);
         if (current.kind === "mozzarella") window.setTimeout(() => navigator.vibrate?.(10), 0);
       } else if (!current.dragging) {
-        addToppingRef.current(current.kind, { origin: { x: current.originX, y: current.originY } });
+        const topping = TOPPINGS.find((item) => item.id === current.kind)!;
+        addToppingRef.current(current.kind, {
+          origin: { x: current.originX, y: current.originY },
+          count: topping.piecesPerTap,
+        });
       }
       setDragKind(null);
       setDragOver(false);
@@ -670,7 +733,7 @@ export default function BuildYourPizza() {
         <div className="pizza-builder__dock">
           <div className="pizza-builder__dock-heading">
             <span className="pizza-builder__dock-title">Toppings</span>
-            <span className="pizza-builder__dock-hint">Tap or hold + drag</span>
+            <span className="pizza-builder__dock-hint">Tap a handful · drag one</span>
           </div>
           <div className="pizza-builder__topping-row" aria-label="Pizza toppings">
             {TOPPINGS.map((topping) => (
@@ -678,7 +741,7 @@ export default function BuildYourPizza() {
                 key={topping.id}
                 type="button"
                 disabled={firing}
-                aria-label={`${topping.name}, ${formatPrice(topping.priceKes)} each${counts[topping.id] ? `, added ${counts[topping.id]} times` : ""}. Tap to add or hold and drag.`}
+                aria-label={`${topping.name}, ${formatPrice(topping.priceKes)} per piece. Tap to add ${topping.piecesPerTap} pieces for ${formatPrice(topping.priceKes * topping.piecesPerTap)}, or hold and drag to place one.${counts[topping.id] ? ` Added ${counts[topping.id]} pieces.` : ""}`}
                 aria-pressed={counts[topping.id] > 0}
                 className="pizza-builder__topping"
                 onPointerDown={(event) => startPress(topping.id, event)}
@@ -691,7 +754,12 @@ export default function BuildYourPizza() {
                     const origin = orb
                       ? { x: orb.left + orb.width / 2, y: orb.top + orb.height / 2 }
                       : undefined;
-                    addTopping(topping.id, origin ? { origin } : {});
+                    addTopping(
+                      topping.id,
+                      origin
+                        ? { origin, count: topping.piecesPerTap }
+                        : { count: topping.piecesPerTap },
+                    );
                   }
                 }}
               >
@@ -708,7 +776,11 @@ export default function BuildYourPizza() {
                 </span>
                 <span className="pizza-builder__topping-name">{topping.name}</span>
                 <span className="pizza-builder__topping-price">
-                  +{formatPrice(topping.priceKes)}
+                  <span>+{formatPrice(topping.priceKes)} each</span>
+                  <span className="pizza-builder__topping-batch">
+                    {topping.piecesPerTap} pcs · +
+                    {formatPrice(topping.priceKes * topping.piecesPerTap)}
+                  </span>
                 </span>
               </button>
             ))}
@@ -780,8 +852,9 @@ export default function BuildYourPizza() {
           flight={flight}
           onLand={(id) => {
             setFlights((current) => current.filter((item) => item.id !== id));
+            setPlaced((current) => [...current, flight.placement]);
             playNextOneShot(toppingAudioPoolRef.current, toppingAudioCursorRef);
-            jigglePizza(stageRef.current);
+            if (flight.batchFinal) jigglePizza(stageRef.current);
           }}
         />
       ))}
