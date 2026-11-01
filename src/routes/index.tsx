@@ -144,6 +144,8 @@ function Index() {
 
 function OrbitCarousel({ query }: { query: string }) {
   const [pos, setPos] = useState(0);
+  const [orderDish, setOrderDish] = useState<(typeof dishes)[number] | null>(null);
+  const [dropLocation, setDropLocation] = useState("");
   const drag = useRef<{ x: number; start: number } | null>(null);
   const wheelLock = useRef(0);
   const filteredDishes = dishes.filter((dish) => `${dish.name} ${dish.ingredients} ${"keywords" in dish ? dish.keywords : ""}`.toLowerCase().includes(query.trim().toLowerCase()));
@@ -190,23 +192,38 @@ function OrbitCarousel({ query }: { query: string }) {
               zIndex: 20 - Math.round(distance * 4),
               pointerEvents: distance < 0.5 ? "auto" : "none",
             }}>
-            <div className="relative ml-6 rounded-[28px] bg-background p-5 pl-28 pt-32 text-foreground shadow-paper md:pl-36 md:pt-40">
-              <img src={dish.img} alt={dish.name} width={1024} height={1024} draggable={false}
-                loading={distance < 1 ? "eager" : "lazy"} fetchPriority={distance < 0.5 ? "high" : "auto"} decoding="async"
-                className="absolute -left-6 -top-16 w-44 origin-bottom drop-shadow-[0_26px_30px_rgba(36,32,30,0.6)] md:-left-14 md:-top-12 md:w-48"
-                style={{ transform: `rotate(-8deg) scale(${distance < 0.5 ? 1.14 : 0.92})` }} />
+            <div className="relative overflow-hidden rounded-[30px] border border-white/35 bg-white/15 p-4 text-foreground shadow-[0_22px_70px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.65)] backdrop-blur-2xl md:p-5">
+              <div className="mb-4 overflow-hidden rounded-[22px] border border-white/30 bg-black/5">
+                <img src={dish.img} alt={dish.name} width={1024} height={1024} draggable={false}
+                  loading={distance < 1 ? "eager" : "lazy"} fetchPriority={distance < 0.5 ? "high" : "auto"} decoding="async"
+                  className="h-48 w-full object-cover md:h-52" />
+              </div>
               <h2 className="font-display text-2xl leading-tight">{dish.name}</h2>
               <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground md:text-xs">{dish.ingredients}</p>
-              <div className="mt-4 -ml-20 flex w-[calc(100%+5rem)] items-center justify-between gap-3 md:-ml-32 md:w-[calc(100%+8rem)]">
+              <div className="mt-5 flex items-center justify-between gap-3">
                 <p className="font-mono text-xl font-bold text-primary md:text-2xl">KSh {dish.price.toLocaleString()}</p>
-                <a href={wa(`Hi Bar Bar! I'd like to order ${dish.name} — KSh ${dish.price.toLocaleString()}.`)} target="_blank" rel="noreferrer" aria-label={`Order ${dish.name} on WhatsApp`} className="pill pill-primary flex shrink-0 items-center gap-2 transition-transform hover:scale-[1.03] active:scale-95">Order now <Phone className="h-4 w-4" strokeWidth={2.2} aria-hidden /></a>
+                <button type="button" onClick={() => { setDropLocation(""); setOrderDish(dish); }} aria-label={`Order ${dish.name}`} className="pill pill-primary flex shrink-0 items-center gap-2 transition-transform hover:scale-[1.03] active:scale-95">Order now <Phone className="h-4 w-4" strokeWidth={2.2} aria-hidden /></button>
               </div>
-              <a href="#book" className="mt-2 -ml-20 flex w-[calc(100%+5rem)] items-center justify-center gap-2 rounded-full border border-foreground/20 py-2.5 font-mono text-[10px] uppercase tracking-[0.25em] text-foreground transition-colors hover:border-primary hover:text-primary md:-ml-32 md:w-[calc(100%+8rem)] md:text-[11px]">Reserve a table <span aria-hidden>→</span></a>
-            </div>
+              <a href="#book" className="mt-3 flex w-full items-center justify-center gap-2 rounded-full border border-foreground/20 py-2.5 font-mono text-[10px] uppercase tracking-[0.25em] text-foreground transition-colors hover:border-primary hover:text-primary md:text-[11px]">Reserve a table <span aria-hidden>→</span></a>
+            </div>      </div>
           </article>
         );
       })}
       {n === 0 && <div className="absolute inset-x-5 top-1/2 -translate-y-1/2 text-center font-mono text-xs uppercase tracking-[0.2em] text-night-foreground/70">No dishes found. Try another search.</div>}
+      {orderDish && (
+        <div className="fixed inset-0 z-[100] grid place-items-center bg-black/65 p-4 backdrop-blur-md" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setOrderDish(null); }}>
+          <form className="w-full max-w-md rounded-[28px] border border-white/35 bg-white/90 p-6 text-foreground shadow-2xl backdrop-blur-2xl" onSubmit={(event) => { event.preventDefault(); const message = "Hi Bar Bar! I would like to order " + orderDish.name + " — KSh " + orderDish.price.toLocaleString() + ". My drop-off location is: " + dropLocation.trim() + ". Please confirm availability and delivery."; window.open(wa(message), "_blank", "noopener,noreferrer"); setOrderDish(null); }}>
+            <div className="mb-5 flex items-start justify-between gap-4">
+              <div><p className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary">Delivery details</p><h3 className="mt-2 font-display text-3xl">Where should we bring it?</h3><p className="mt-1 text-sm text-muted-foreground">{orderDish.name} · KSh {orderDish.price.toLocaleString()}</p></div>
+              <button type="button" onClick={() => setOrderDish(null)} aria-label="Close delivery form" className="rounded-full border border-foreground/15 p-2"><X className="h-4 w-4" /></button>
+            </div>
+            <label htmlFor="barbar-drop-location" className="mb-2 block text-xs font-semibold">Drop-off location</label>
+            <textarea id="barbar-drop-location" required autoFocus value={dropLocation} onChange={(event) => setDropLocation(event.target.value)} placeholder="Area, street, building or nearby landmark…" rows={3} className="w-full resize-none rounded-2xl border border-foreground/15 bg-white/75 px-4 py-3 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15" />
+            <button type="submit" className="pill pill-primary mt-4 flex w-full justify-center">Continue to WhatsApp <Phone className="ml-2 h-4 w-4" /></button>
+            <p className="mt-3 text-center text-[11px] text-muted-foreground">Your order details and location will be sent to Bar Bar.</p>
+          </form>
+        </div>
+      )}
       <div className="absolute bottom-1 left-1/2 flex -translate-x-1/2 gap-1.5">
         {filteredDishes.map((_, index) => <span key={index} className={`h-1 rounded-full transition-all duration-500 ${index === active ? "w-6 bg-primary" : "w-2 bg-night-foreground/40"}`} />)}
       </div>
