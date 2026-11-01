@@ -185,18 +185,18 @@ function OrbitCarousel({ query }: { query: string }) {
         const angle = offset * 0.55;
         return (
           <article key={dish.name}
-            className="absolute left-1/2 top-[52%] w-[min(88vw,360px)] md:w-[344px] transition-all duration-700 ease-[var(--ease-dough)]"
+            className="absolute left-1/2 top-[52%] w-[min(90vw,440px)] md:w-[420px] transition-all duration-700 ease-[var(--ease-dough)]"
             style={{
               transform: `translate(-50%,-50%) translate3d(${Math.sin(angle) * radius}px, ${(1 - Math.cos(angle)) * 160}px, ${-distance * 180}px) rotateY(${offset * -22}deg)`,
               opacity: distance > 2.2 ? 0 : 1 - distance * 0.3,
               zIndex: 20 - Math.round(distance * 4),
               pointerEvents: distance < 0.5 ? "auto" : "none",
             }}>
-            <div className="relative overflow-hidden rounded-[30px] border border-white/35 bg-white/15 p-4 text-foreground shadow-[0_22px_70px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.65)] backdrop-blur-2xl md:p-5">
-              <div className="mb-4 overflow-hidden rounded-[22px] border border-white/30 bg-black/5">
+            <div className="relative overflow-hidden rounded-[30px] border border-[#e8d9c4] bg-[#f8f0e3] p-4 text-[#35251c] shadow-[0_18px_48px_rgba(28,18,10,0.20),inset_0_1px_0_rgba(255,255,255,0.9)] md:p-5">
+              <div className="mb-4 flex max-h-[370px] min-h-[190px] items-center justify-center overflow-hidden rounded-[22px] border border-[#eadcc9] bg-[#fffaf1] p-2">
                 <img src={dish.img} alt={dish.name} width={1024} height={1024} draggable={false}
                   loading={distance < 1 ? "eager" : "lazy"} fetchPriority={distance < 0.5 ? "high" : "auto"} decoding="async"
-                  className="h-48 w-full object-cover md:h-52" />
+                  className="block h-auto max-h-[350px] w-full object-contain" />
               </div>
               <h2 className="font-display text-2xl leading-tight">{dish.name}</h2>
               <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground md:text-xs">{dish.ingredients}</p>
