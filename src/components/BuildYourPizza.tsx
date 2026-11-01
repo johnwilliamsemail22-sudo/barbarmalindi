@@ -85,8 +85,22 @@ type PointerSession = {
 const SPRING_STIFFNESS = 400;
 const SPRING_DAMPING = 25;
 const BASE_PRICE_KES = 1100;
-const MAX_TOTAL_KES = 2000;
 const ORDER_PHONE = "254743898575";
+
+function playOneShot(sound: HTMLAudioElement | null) {
+  if (!sound) return;
+  sound.pause();
+  sound.currentTime = 0;
+  void sound.play().catch(() => undefined);
+}
+
+function playNextOneShot(pool: HTMLAudioElement[], cursor: { current: number }) {
+  if (pool.length === 0) return;
+  const sound = pool[cursor.current % pool.length];
+  if (!sound) return;
+  cursor.current = (cursor.current + 1) % pool.length;
+  playOneShot(sound);
+}
 
 function formatPrice(shillings: number) {
   return `KSh ${new Intl.NumberFormat("en-KE", { maximumFractionDigits: 0 }).format(shillings)}`;
@@ -270,7 +284,6 @@ export default function BuildYourPizza() {
   const [flights, setFlights] = useState<ToppingFlight[]>([]);
   const [visiblePrice, setVisiblePrice] = useState(BASE_PRICE_KES);
   const [firing, setFiring] = useState(false);
-  const [priceLimitReached, setPriceLimitReached] = useState(false);
   const [fired, setFired] = useState(false);
   const [countdown, setCountdown] = useState(8);
   const [dragKind, setDragKind] = useState<ToppingId | null>(null);
@@ -280,10 +293,33 @@ export default function BuildYourPizza() {
   const dragImageRef = useRef<HTMLImageElement>(null);
   const pointerRef = useRef<PointerSession | null>(null);
   const orderTimerRef = useRef<number | null>(null);
+  const toppingAudioPoolRef = useRef<HTMLAudioElement[]>([]);
+  const toppingAudioCursorRef = useRef(0);
+  const ignitionAudioRef = useRef<HTMLAudioElement | null>(null);
   const displayedPriceRef = useRef(BASE_PRICE_KES);
   const addToppingRef = useRef<(kind: ToppingId, options?: AddToppingOptions) => void>(
     () => undefined,
   );
+
+  useEffect(() => {
+    const dropSounds = Array.from({ length: 3 }, () => {
+      const sound = new Audio("/audio/topping-drop.mp3");
+      sound.preload = "auto";
+      sound.volume = 0.52;
+      return sound;
+    });
+    const ignitionSound = new Audio("/audio/oven-ignition.mp3");
+    ignitionSound.preload = "auto";
+    ignitionSound.volume = 0.68;
+    toppingAudioPoolRef.current = dropSounds;
+    ignitionAudioRef.current = ignitionSound;
+    return () => {
+      dropSounds.forEach((sound) => sound.pause());
+      ignitionSound.pause();
+      toppingAudioPoolRef.current = [];
+      ignitionAudioRef.current = null;
+    };
+  }, []);
 
   const basePrice = SIZES.find((candidate) => candidate.id === size)!.priceKes;
   const totalPrice =
@@ -311,12 +347,6 @@ export default function BuildYourPizza() {
 
   const addTopping = (kind: ToppingId, options: AddToppingOptions = {}) => {
     if (firing) return;
-    const topping = TOPPINGS.find((item) => item.id === kind)!;
-    if (totalPrice + topping.priceKes > MAX_TOTAL_KES) {
-      setPriceLimitReached(true);
-      return;
-    }
-    setPriceLimitReached(totalPrice + topping.priceKes >= MAX_TOTAL_KES);
     if (fired) setFired(false);
 
     const point = options.point ?? randomSaucePoint();
@@ -458,6 +488,7 @@ export default function BuildYourPizza() {
         if (current.kind !== "mozzarella" || !current.sprinkled) {
           addToppingRef.current(current.kind, { point: { x, y } });
         }
+        playNextOneShot(toppingAudioPoolRef.current, toppingAudioCursorRef);
         if (current.kind === "mozzarella") window.setTimeout(() => navigator.vibrate?.(10), 0);
       } else if (!current.dragging) {
         addToppingRef.current(current.kind, { origin: { x: current.originX, y: current.originY } });
@@ -550,6 +581,7 @@ export default function BuildYourPizza() {
   const beginFire = () => {
     if (firing || fired || flights.length > 0) return;
     setFired(false);
+    playOneShot(ignitionAudioRef.current);
     setFiring(true);
   };
 
@@ -562,9 +594,7 @@ export default function BuildYourPizza() {
     ? "Wood fire, 90 seconds"
     : fired
       ? "Oven's hot. Your pizza is ready to send."
-      : priceLimitReached
-        ? `Maximum total ${formatPrice(MAX_TOTAL_KES)} reached. Choose a smaller size to keep building.`
-        : helperText;
+      : helperText;
 
   return (
     <section id="build" className="pizza-builder" data-firing={firing} data-drop-ready={dragOver}>
@@ -592,13 +622,7 @@ export default function BuildYourPizza() {
                 aria-pressed={size === candidate.id}
                 aria-label={`${candidate.diameter} size`}
                 onClick={() => {
-                  const nextTotal = candidate.priceKes + (totalPrice - basePrice);
-                  if (nextTotal > MAX_TOTAL_KES) {
-                    setPriceLimitReached(true);
-                    return;
-                  }
                   setSize(candidate.id);
-                  setPriceLimitReached(nextTotal >= MAX_TOTAL_KES);
                   setFired(false);
                 }}
                 className="pizza-builder__size"
@@ -756,6 +780,7 @@ export default function BuildYourPizza() {
           flight={flight}
           onLand={(id) => {
             setFlights((current) => current.filter((item) => item.id !== id));
+            playNextOneShot(toppingAudioPoolRef.current, toppingAudioCursorRef);
             jigglePizza(stageRef.current);
           }}
         />
