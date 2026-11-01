@@ -205,7 +205,7 @@ function OrbitCarousel({ query }: { query: string }) {
                 <button type="button" onClick={() => { setDropLocation(""); setOrderDish(dish); }} aria-label={`Order ${dish.name}`} className="pill pill-primary flex shrink-0 items-center gap-2 transition-transform hover:scale-[1.03] active:scale-95">Order now <Phone className="h-4 w-4" strokeWidth={2.2} aria-hidden /></button>
               </div>
               <a href="#book" className="mt-3 flex w-full items-center justify-center gap-2 rounded-full border border-foreground/20 py-2.5 font-mono text-[10px] uppercase tracking-[0.25em] text-foreground transition-colors hover:border-primary hover:text-primary md:text-[11px]">Reserve a table <span aria-hidden>→</span></a>
-            </div>      </div>
+            </div>
           </article>
         );
       })}
