@@ -219,7 +219,7 @@ function OrbitCarousel({ query }: { query: string }) {
             </div>
             <label htmlFor="barbar-drop-location" className="mb-2 block text-xs font-semibold">Drop-off location</label>
             <textarea id="barbar-drop-location" required autoFocus value={dropLocation} onChange={(event) => setDropLocation(event.target.value)} placeholder="Area, street, building or nearby landmark…" rows={3} className="w-full resize-none rounded-2xl border border-foreground/15 bg-white/75 px-4 py-3 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15" />
-            <button type="submit" className="pill pill-primary mt-4 flex w-full justify-center">Continue to WhatsApp <Phone className="ml-2 h-4 w-4" /></button>
+            <button type="submit" className="pill pill-primary mt-4 flex w-full justify-center">Order Now <Phone className="ml-2 h-4 w-4" /></button>
             <p className="mt-3 text-center text-[11px] text-muted-foreground">Your order details and location will be sent to Bar Bar.</p>
           </form>
         </div>
