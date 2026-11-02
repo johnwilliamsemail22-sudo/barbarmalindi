@@ -40,10 +40,10 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/order-demo' | '/staff-demo'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/order-demo' | '/staff-demo'
+  id: '__root__' | '/' | '/order-demo' | '/staff-demo'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
