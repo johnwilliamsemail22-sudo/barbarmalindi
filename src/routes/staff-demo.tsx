@@ -15,14 +15,14 @@ const seed: DemoOrder[] = [
 const money=(n:number)=>"KSh "+n.toLocaleString("en-KE");
 const stages=["New","Accepted","Preparing","Ready","Delivered"];
 function StaffDemo(){
- const [orders,setOrders]=useState<DemoOrder[]>(()=>{try{const saved=JSON.parse(localStorage.getItem("barbar-demo-orders")||"[]") as DemoOrder[];return [...saved,...seed];}catch{return seed;}});
+ const [orders,setOrders]=useState<DemoOrder[]>(seed);
  const [filter,setFilter]=useState("All");
  const [selected,setSelected]=useState<string|null>(seed[0].id);
  const [search,setSearch]=useState("");
  const [sound,setSound]=useState(false);
  const [toast,setToast]=useState("");
  const [tab,setTab]=useState("Orders");
- useEffect(()=>{const load=()=>{try{const saved=JSON.parse(localStorage.getItem("barbar-demo-orders")||"[]") as DemoOrder[];setOrders([...saved,...seed]);}catch{/* demo storage unavailable */}};const handler=()=>load();window.addEventListener("storage",handler);window.addEventListener("barbar-demo-order",handler);return()=>{window.removeEventListener("storage",handler);window.removeEventListener("barbar-demo-order",handler)}},[]);
+ useEffect(()=>{const load=()=>{try{const saved=JSON.parse(localStorage.getItem("barbar-demo-orders")||"[]") as DemoOrder[];setOrders([...saved,...seed]);}catch{/* demo storage unavailable */}};load();const handler=()=>load();window.addEventListener("storage",handler);window.addEventListener("barbar-demo-order",handler);return()=>{window.removeEventListener("storage",handler);window.removeEventListener("barbar-demo-order",handler)}},[]);
  const selectedOrder=orders.find(o=>o.id===selected)||orders[0];
  const filtered=useMemo(()=>orders.filter(o=>(filter==="All"||o.status===filter)&&[o.id,o.customer.name,o.customer.location].join(" ").toLowerCase().includes(search.toLowerCase())),[orders,filter,search]);
  const active=orders.filter(o=>!["Delivered","Cancelled"].includes(o.status));
