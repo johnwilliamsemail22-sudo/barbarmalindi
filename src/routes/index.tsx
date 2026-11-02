@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
-import { Facebook, Instagram, Phone, Search, X } from "lucide-react";
+import { Facebook, Instagram, Phone, Search, X, ShoppingBag } from "lucide-react";
 import BuildYourPizza from "@/components/BuildYourPizza";
 
 import { venueImageUrl } from "@/lib/assets";
@@ -202,7 +202,7 @@ function OrbitCarousel({ query }: { query: string }) {
               <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground md:text-xs">{dish.ingredients}</p>
               <div className="mt-5 flex items-center justify-between gap-3">
                 <p className="font-mono text-xl font-bold text-primary md:text-2xl">KSh {dish.price.toLocaleString()}</p>
-                <button type="button" onClick={() => { setDropLocation(""); setOrderDish(dish); }} aria-label={`Order ${dish.name}`} className="pill pill-primary flex shrink-0 items-center gap-2 transition-transform hover:scale-[1.03] active:scale-95">Order now <Phone className="h-4 w-4" strokeWidth={2.2} aria-hidden /></button>
+                <button type="button" onClick={() => { window.location.href = "/order-demo"; }} aria-label={`Order ${dish.name} online`} className="pill pill-primary flex shrink-0 items-center gap-2 transition-transform hover:scale-[1.03] active:scale-95">Order online <ShoppingBag className="h-4 w-4" strokeWidth={2.2} aria-hidden /></button>
               </div>
               <a href="#book" className="mt-3 flex w-full items-center justify-center gap-2 rounded-full border border-foreground/20 py-2.5 font-mono text-[10px] uppercase tracking-[0.25em] text-foreground transition-colors hover:border-primary hover:text-primary md:text-[11px]">Reserve a table <span aria-hidden>→</span></a>
             </div>
