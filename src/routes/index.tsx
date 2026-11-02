@@ -124,6 +124,7 @@ function Index() {
       <div className={`relative z-10 flex min-h-[100svh] flex-col justify-end transition-all duration-1000 ease-[var(--ease-dough)] ${locked ? "translate-y-0 opacity-100 delay-700" : "translate-y-16 opacity-0"}`}>
         <OrbitCarousel query={menuQuery} />
         <div className="mx-auto mb-5 mt-4 w-full max-w-xl px-5">
+          <div className="mb-3 flex justify-center"><Link to="/order-demo" className="rounded-full border border-night-foreground/35 bg-night/45 px-5 py-2 font-mono text-[10px] font-bold uppercase tracking-[.2em] text-night-foreground transition hover:border-primary hover:text-primary">See All Menu →</Link></div>
           <label htmlFor="barbar-menu-search" className="sr-only">Search the menu</label>
           <div className="flex items-center gap-3 rounded-full border border-night-foreground/25 bg-night/55 px-4 py-3 text-night-foreground shadow-lg backdrop-blur-md transition-colors focus-within:border-primary">
             <Search className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
@@ -146,6 +147,10 @@ function OrbitCarousel({ query }: { query: string }) {
   const [pos, setPos] = useState(0);
   const [orderDish, setOrderDish] = useState<(typeof dishes)[number] | null>(null);
   const [dropLocation, setDropLocation] = useState("");
+  const [customerName, setCustomerName] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [orderSuccess, setOrderSuccess] = useState(false);
+  const [quickOrderNumber, setQuickOrderNumber] = useState("");
   const drag = useRef<{ x: number; start: number } | null>(null);
   const wheelLock = useRef(0);
   const filteredDishes = dishes.filter((dish) => `${dish.name} ${dish.ingredients} ${"keywords" in dish ? dish.keywords : ""}`.toLowerCase().includes(query.trim().toLowerCase()));
@@ -202,7 +207,7 @@ function OrbitCarousel({ query }: { query: string }) {
               <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground md:text-xs">{dish.ingredients}</p>
               <div className="mt-5 flex items-center justify-between gap-3">
                 <p className="font-mono text-xl font-bold text-primary md:text-2xl">KSh {dish.price.toLocaleString()}</p>
-                <Link to="/order-demo" aria-label={`Order ${dish.name} online`} className="pill pill-primary flex shrink-0 items-center gap-2 transition-transform hover:scale-[1.03] active:scale-95">Order online <ShoppingBag className="h-4 w-4" strokeWidth={2.2} aria-hidden /></Link>
+                <button type="button" onClick={() => { setOrderDish(dish); setDropLocation(""); setCustomerName(""); setCustomerPhone(""); setOrderSuccess(false); }} aria-label={`Order ${dish.name} online`} className="pill pill-primary flex shrink-0 items-center gap-2 transition-transform hover:scale-[1.03] active:scale-95">Order Now <ShoppingBag className="h-4 w-4" strokeWidth={2.2} aria-hidden /></button>
               </div>
               <a href="#book" className="mt-3 flex w-full items-center justify-center gap-2 rounded-full border border-foreground/20 py-2.5 font-mono text-[10px] uppercase tracking-[0.25em] text-foreground transition-colors hover:border-primary hover:text-primary md:text-[11px]">Reserve a table <span aria-hidden>→</span></a>
             </div>
@@ -212,18 +217,20 @@ function OrbitCarousel({ query }: { query: string }) {
       {n === 0 && <div className="absolute inset-x-5 top-1/2 -translate-y-1/2 text-center font-mono text-xs uppercase tracking-[0.2em] text-night-foreground/70">No dishes found. Try another search.</div>}
       {orderDish && (
         <div className="fixed inset-0 z-[100] grid place-items-center bg-black/65 p-4 backdrop-blur-md" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setOrderDish(null); }}>
-          <form className="w-full max-w-md rounded-[28px] border border-white/35 bg-white/90 p-6 text-foreground shadow-2xl backdrop-blur-2xl" onSubmit={(event) => { event.preventDefault(); const message = "Hi Bar Bar! I would like to order " + orderDish.name + " — KSh " + orderDish.price.toLocaleString() + ". My drop-off location is: " + dropLocation.trim() + ". Please confirm availability and delivery."; window.open(wa(message), "_blank", "noopener,noreferrer"); setOrderDish(null); }}>
+          <form className="w-full max-w-md rounded-[28px] border border-white/35 bg-white/90 p-6 text-foreground shadow-2xl backdrop-blur-2xl" onSubmit={(event) => { event.preventDefault(); const id = "BB-" + Math.floor(1000 + Math.random() * 9000); const message = "NEW BAR BAR ORDER " + id + "\nDish: " + orderDish.name + "\nPrice: KSh " + orderDish.price.toLocaleString() + "\nName: " + customerName.trim() + "\nPhone: " + customerPhone.trim() + "\nDelivery location: " + dropLocation.trim(); window.open(wa(message), "_blank", "noopener,noreferrer"); setQuickOrderNumber(id); setOrderSuccess(true); }}>
             <div className="mb-5 flex items-start justify-between gap-4">
               <div><p className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary">Delivery details</p><h3 className="mt-2 font-display text-3xl">Where should we bring it?</h3><p className="mt-1 text-sm text-muted-foreground">{orderDish.name} · KSh {orderDish.price.toLocaleString()}</p></div>
               <button type="button" onClick={() => setOrderDish(null)} aria-label="Close delivery form" className="rounded-full border border-foreground/15 p-2"><X className="h-4 w-4" /></button>
             </div>
-            <label htmlFor="barbar-drop-location" className="mb-2 block text-xs font-semibold">Drop-off location</label>
-            <textarea id="barbar-drop-location" required autoFocus value={dropLocation} onChange={(event) => setDropLocation(event.target.value)} placeholder="Area, street, building or nearby landmark…" rows={3} className="w-full resize-none rounded-2xl border border-foreground/15 bg-white/75 px-4 py-3 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15" />
-            <button type="submit" className="pill pill-primary mt-4 flex w-full justify-center">Order Now <Phone className="ml-2 h-4 w-4" /></button>
+            <label className="mb-1 block text-xs font-semibold" htmlFor="barbar-customer-name">Your name</label><input id="barbar-customer-name" required value={customerName} onChange={(event) => setCustomerName(event.target.value)} placeholder="Full name" className="mb-3 w-full rounded-2xl border border-foreground/15 bg-white/75 px-4 py-3 text-sm outline-none focus:border-primary" />
+            <label className="mb-1 block text-xs font-semibold" htmlFor="barbar-customer-phone">Phone number</label><input id="barbar-customer-phone" required type="tel" value={customerPhone} onChange={(event) => setCustomerPhone(event.target.value)} placeholder="+254…" className="mb-3 w-full rounded-2xl border border-foreground/15 bg-white/75 px-4 py-3 text-sm outline-none focus:border-primary" />
+            <label htmlFor="barbar-drop-location" className="mb-1 block text-xs font-semibold">Delivery location</label><textarea id="barbar-drop-location" required value={dropLocation} onChange={(event) => setDropLocation(event.target.value)} placeholder="Area, street, building or nearby landmark…" rows={2} className="w-full resize-none rounded-2xl border border-foreground/15 bg-white/75 px-4 py-3 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15" />
+            <button type="submit" className="pill pill-primary mt-4 flex w-full justify-center" >Place Order <Phone className="ml-2 h-4 w-4" /></button>
             <p className="mt-3 text-center text-[11px] text-muted-foreground">Your order details and location will be sent to Bar Bar.</p>
           </form>
         </div>
       )}
+<>{orderDish && orderSuccess && <div className="fixed inset-0 z-[110] grid place-items-center bg-black/70 p-4 backdrop-blur-md"><div className="w-full max-w-sm rounded-[30px] bg-[#fffaf1] p-8 text-center text-[#35251c] shadow-2xl"><div className="success-pop mx-auto grid h-20 w-20 place-items-center rounded-full bg-[#e3efdf] text-[#397448]"><span className="text-4xl">✓</span></div><p className="mt-6 font-mono text-[10px] uppercase tracking-[.25em] text-primary">Order confirmation</p><h3 className="mt-2 font-display text-4xl">Order received!</h3><p className="mt-3 text-sm leading-6 text-[#76695b]">Your order <strong>{quickOrderNumber}</strong> for <strong>{orderDish.name}</strong> is ready for confirmation with our team.</p><a href={"tel:" + PHONE} className="mt-5 flex items-center justify-center gap-2 rounded-full bg-[#202729] px-5 py-3 text-sm font-bold text-white"><Phone className="h-4 w-4" /> Call {PHONE_DISPLAY}</a><button type="button" onClick={() => { setOrderDish(null); setOrderSuccess(false); }} className="mt-3 w-full rounded-full border border-[#d8cbbb] py-3 text-xs font-bold">Done</button></div><style>{"@keyframes success-pop{0%{transform:scale(.45);opacity:0}65%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}.success-pop{animation:success-pop .55s cubic-bezier(.2,.8,.2,1) both}"}</style></div>}</>
       <div className="absolute bottom-1 left-1/2 flex -translate-x-1/2 gap-1.5">
         {filteredDishes.map((_, index) => <span key={index} className={`h-1 rounded-full transition-all duration-500 ${index === active ? "w-6 bg-primary" : "w-2 bg-night-foreground/40"}`} />)}
       </div>
