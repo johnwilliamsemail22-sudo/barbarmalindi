@@ -15,19 +15,19 @@ const seed: DemoOrder[] = [
 const money=(n:number)=>"KSh "+n.toLocaleString("en-KE");
 const stages=["New","Accepted","Preparing","Ready","Delivered"];
 function StaffDemo(){
- const [orders,setOrders]=useState<DemoOrder[]>(seed);
+ const [orders,setOrders]=useState<DemoOrder[]>(()=>{try{const saved=JSON.parse(localStorage.getItem("barbar-demo-orders")||"[]") as DemoOrder[];return [...saved,...seed];}catch{return seed;}});
  const [filter,setFilter]=useState("All");
  const [selected,setSelected]=useState<string|null>(seed[0].id);
  const [search,setSearch]=useState("");
  const [sound,setSound]=useState(false);
  const [toast,setToast]=useState("");
  const [tab,setTab]=useState("Orders");
- useEffect(()=>{const load=()=>{try{const saved=JSON.parse(localStorage.getItem("barbar-demo-orders")||"[]") as DemoOrder[];setOrders([...saved,...seed]);}catch{/* demo storage unavailable */}};load();const handler=()=>load();window.addEventListener("storage",handler);window.addEventListener("barbar-demo-order",handler);return()=>{window.removeEventListener("storage",handler);window.removeEventListener("barbar-demo-order",handler)}},[]);
+ useEffect(()=>{const load=()=>{try{const saved=JSON.parse(localStorage.getItem("barbar-demo-orders")||"[]") as DemoOrder[];setOrders([...saved,...seed]);}catch{/* demo storage unavailable */}};const handler=()=>load();window.addEventListener("storage",handler);window.addEventListener("barbar-demo-order",handler);return()=>{window.removeEventListener("storage",handler);window.removeEventListener("barbar-demo-order",handler)}},[]);
  const selectedOrder=orders.find(o=>o.id===selected)||orders[0];
  const filtered=useMemo(()=>orders.filter(o=>(filter==="All"||o.status===filter)&&[o.id,o.customer.name,o.customer.location].join(" ").toLowerCase().includes(search.toLowerCase())),[orders,filter,search]);
  const active=orders.filter(o=>!["Delivered","Cancelled"].includes(o.status));
  const revenue=orders.filter(o=>o.status==="Delivered").reduce((s,o)=>s+o.total,0);
- const update=(id:string,status:string)=>{setOrders(current=>current.map(o=>o.id===id?{...o,status}:o));setToast("Order "+id+" moved to "+status);setTimeout(()=>setToast(""),2600);};
+ const update=(id:string,status:string)=>{setOrders(current=>{const next=current.map(o=>o.id===id?{...o,status}:o);try{const sampleIds=seed.map(sample=>sample.id);localStorage.setItem("barbar-demo-orders",JSON.stringify(next.filter(o=>!sampleIds.includes(o.id))));}catch{/* demo storage unavailable */}return next;});setToast("Order "+id+" moved to "+status);setTimeout(()=>setToast(""),2600);};
  const enableSound=()=>{setSound(true);try{const Ctx=window.AudioContext||(window as typeof window & {webkitAudioContext?:typeof AudioContext}).webkitAudioContext;if(Ctx){const ctx=new Ctx();const osc=ctx.createOscillator();const gain=ctx.createGain();osc.connect(gain);gain.connect(ctx.destination);osc.frequency.value=740;gain.gain.value=.06;osc.start();osc.stop(ctx.currentTime+.18);}}catch{/* sound is optional in preview */}};
  return <main className="min-h-screen bg-[#f3f5f4] text-[#202927]">
   <div className="flex min-h-screen">
