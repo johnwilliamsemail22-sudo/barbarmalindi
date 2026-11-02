@@ -38,13 +38,7 @@ function OrderDemo() {
     const id = "BB-" + Math.floor(1000 + Math.random() * 9000);
     const orderItems = menu.filter(item => cart[item.id]).map(item => ({ name: item.name, qty: cart[item.id], price: item.price }));
     const order = { id, customer, items: orderItems, total, status: "New", createdAt: new Date().toISOString() };
-    const message = ["NEW BAR BAR ORDER " + id, ...orderItems.map(item => item.qty + " × " + item.name + " — " + money(item.price * item.qty)), "Total: " + money(total), "Name: " + customer.name, "Phone: " + customer.phone, "Delivery: " + customer.location, "Notes: " + (customer.notes || "None")].join("\n");
-    window.open("https://wa.me/254743898575?text=" + encodeURIComponent(message), "_blank", "noopener,noreferrer");
-    try {
-      const existing = JSON.parse(localStorage.getItem("barbar-demo-orders") || "[]");
-      localStorage.setItem("barbar-demo-orders", JSON.stringify([order, ...existing]));
-      window.dispatchEvent(new Event("barbar-demo-order"));
-    } catch { /* Demo remains usable even if browser storage is unavailable. */ }
+    try { const existing = JSON.parse(localStorage.getItem("barbar-demo-orders") || "[]"); localStorage.setItem("barbar-demo-orders", JSON.stringify([order, ...existing])); window.dispatchEvent(new Event("barbar-demo-order")); } catch (error) { console.error("Could not save order", error); }
     setOrderNumber(id);
     setPlaced(true);
     setCheckout(false);
