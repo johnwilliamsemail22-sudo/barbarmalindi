@@ -12,7 +12,7 @@ const menu = [
   { id: "diavola", name: "Diavola", description: "Tomato, mozzarella, spicy salami, chilli honey and basil.", price: 1350, category: "Pizza", image: "https://images.unsplash.com/photo-1571407970349-bc81e7e96d47?w=720&q=70&auto=format&fit=crop" },
   { id: "margherita", name: "Margherita", description: "Tomato, mozzarella, fresh basil and extra virgin olive oil.", price: 1150, category: "Pizza", image: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=720&q=70&auto=format&fit=crop" },
   { id: "prawns", name: "Malindi Grilled Prawns", description: "Coast prawns, garlic butter, red chilli and charred lemon.", price: 1850, category: "Coastal", image: "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?w=720&q=70&auto=format&fit=crop" },
-  { id: "linguine", name: "Seafood Linguine", description: "Prawns, calamari, garlic, cherry tomato, parsley and lemon.", price: 1950, category: "Coastal", image: "https://images.unsplash.com/photo-1555949258-eb67b1ef0f?w=720&q=70&auto=format&fit=crop" },
+  { id: "linguine", name: "Seafood Linguine", description: "Prawns, calamari, garlic, cherry tomato, parsley and lemon.", price: 1950, category: "Coastal", image: "https://images.unsplash.com/photo-1551183053-bf91a1d32f6e?w=720&q=70&auto=format&fit=crop" },
   { id: "fondant", name: "Chocolate Fondant", description: "Warm dark chocolate cake with a molten centre.", price: 850, category: "Dessert", image: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=720&q=70&auto=format&fit=crop" },
 ];
 type Cart = Record<string, number>;
