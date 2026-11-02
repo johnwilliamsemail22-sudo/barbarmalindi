@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
-import { ArrowLeft, Flame, Plus } from "lucide-react";
+import { ArrowLeft, Flame, Plus, Phone, MessageCircle, Check } from "lucide-react";
 import base from "@/assets/base.png";
 import basilImage from "@/assets/t-basil.png";
 import mozzarellaImage from "@/assets/t-mozz-shreds.png";
@@ -118,6 +118,7 @@ const SPRING_DAMPING = 25;
 const BASE_PRICE_KES = 1100;
 const BATCH_PIECE_SCALE = 1.35;
 const ORDER_PHONE = "254743898575";
+const ORDER_PHONE_DISPLAY = "+254 743 898 575";
 
 function playOneShot(sound: HTMLAudioElement | null) {
   if (!sound) return;
@@ -341,6 +342,8 @@ export default function BuildYourPizza() {
   const [visiblePrice, setVisiblePrice] = useState(BASE_PRICE_KES);
   const [firing, setFiring] = useState(false);
   const [fired, setFired] = useState(false);
+  const [orderPlaced, setOrderPlaced] = useState(false);
+  const [customOrderNumber, setCustomOrderNumber] = useState("");
   const [countdown, setCountdown] = useState(8);
   const [dragKind, setDragKind] = useState<ToppingId | null>(null);
   const [dragOver, setDragOver] = useState(false);
@@ -651,8 +654,15 @@ export default function BuildYourPizza() {
   const toppingSummary = TOPPINGS.filter((topping) => counts[topping.id] > 0)
     .map((topping) => `${topping.name} x${counts[topping.id]}`)
     .join(", ");
-  const orderText = `Hi Bar Bar! I'd like a ${size} custom pizza${toppingSummary ? ` with ${toppingSummary}` : ""}. Total: ${formatPrice(totalPrice)}.`;
-  const orderUrl = `https://wa.me/${ORDER_PHONE}?text=${encodeURIComponent(orderText)}`;
+  const placeCustomPizzaOrder = () => {
+    const id = "BB-" + Date.now().toString().slice(-6);
+    const description = size + " custom pizza" + (toppingSummary ? " — " + toppingSummary : "");
+    const order = { id, customer: { name: "", phone: "", location: "", notes: "Custom pizza order — please contact customer for details." }, items: [{ name: description, qty: 1, price: totalPrice }], total: totalPrice, status: "New", createdAt: new Date().toISOString() };
+    try { const existing = JSON.parse(localStorage.getItem("barbar-demo-orders") || "[]"); localStorage.setItem("barbar-demo-orders", JSON.stringify([order, ...existing])); window.dispatchEvent(new Event("barbar-demo-order")); }
+    catch (error) { console.error("Could not save custom pizza order", error); }
+    setCustomOrderNumber(id); setOrderPlaced(true);
+  };
+  const whatsappUrl = "https://wa.me/" + ORDER_PHONE + "?text=" + encodeURIComponent("Hi Bar Bar, I would like to track my order " + customOrderNumber + ".");
   const status = firing
     ? "Wood fire, 90 seconds"
     : fired
@@ -802,18 +812,13 @@ export default function BuildYourPizza() {
               <span className="pizza-builder__button-price">{formatPrice(visiblePrice)}</span>
             </button>
           ) : fired ? (
-            <a
-              href={orderUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="pizza-builder__fire-button"
-            >
+            <button type="button" onClick={placeCustomPizzaOrder} className="pizza-builder__fire-button">
               <span className="pizza-builder__button-label">
                 <Flame size={18} strokeWidth={2.3} aria-hidden="true" />
                 Send to kitchen
               </span>
               <span className="pizza-builder__button-price">{formatPrice(visiblePrice)}</span>
-            </a>
+            </button>
           ) : (
             <button
               type="button"
@@ -834,6 +839,19 @@ export default function BuildYourPizza() {
         </footer>
       </div>
 
+      {orderPlaced && (
+        <div className="fixed inset-0 z-[120] grid place-items-center bg-black/70 p-5 backdrop-blur-md" role="dialog" aria-modal="true" aria-labelledby="custom-pizza-confirmation-title">
+          <div className="w-full max-w-sm rounded-[28px] bg-[#fffaf1] p-7 text-center text-[#35251c] shadow-2xl">
+            <div className="success-pop mx-auto grid h-16 w-16 place-items-center rounded-full bg-[#e3efdf] text-[#397448]"><Check size={30} /></div>
+            <p className="mt-5 font-mono text-[10px] uppercase tracking-[.24em] text-primary">Order confirmation</p>
+            <h2 id="custom-pizza-confirmation-title" className="mt-2 font-display text-3xl">Your pizza order is received!</h2>
+            <p className="mt-3 text-sm leading-6 text-[#76695b]">Order <strong>{customOrderNumber}</strong> has been added. You can reach us anytime to check on or track your order.</p>
+            <a href={"tel:+" + ORDER_PHONE} className="mt-5 flex items-center justify-center gap-2 rounded-full bg-[#202729] px-5 py-3 text-sm font-bold text-white"><Phone size={17} /> {ORDER_PHONE_DISPLAY}</a>
+            <a href={whatsappUrl} target="_blank" rel="noreferrer" className="mt-3 flex items-center justify-center gap-2 rounded-full border border-[#2b8a55]/30 bg-[#e8f5ec] px-5 py-3 text-sm font-bold text-[#176b3b]"><MessageCircle size={17} /> WhatsApp us</a>
+            <button type="button" onClick={() => { setOrderPlaced(false); setFired(false); setPlaced([]); setSize("L"); }} className="mt-4 w-full rounded-full border border-[#d8cbbb] py-3 text-xs font-bold">Done</button>
+          </div>
+        </div>
+      )}
       <div className="pizza-builder__fire-backdrop" aria-hidden="true">
         <video
           ref={fireVideoRef}
