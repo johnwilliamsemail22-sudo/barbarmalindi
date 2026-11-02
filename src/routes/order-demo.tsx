@@ -64,7 +64,7 @@ function OrderDemo() {
       <div className="absolute inset-0 opacity-35" style={{backgroundImage:"linear-gradient(90deg,#171b1d 0%,transparent 70%),url(https://images.unsplash.com/photo-1513104890138-7c749659a591?w=1400&q=70&auto=format&fit=crop)",backgroundPosition:"center",backgroundSize:"cover"}}/>
       <div className="relative mx-auto grid max-w-7xl items-end gap-8 px-5 py-16 md:grid-cols-[1fr_auto] md:py-24">
         <div><p className="mb-4 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[.3em] text-[#efb86e]"><Sparkles size={13}/> Straight from our kitchen</p><h1 className="max-w-3xl font-display text-5xl leading-[.98] md:text-7xl">A little taste of <em className="text-[#e7a95c]">the coast.</em></h1><p className="mt-5 max-w-lg text-sm leading-7 text-white/70">Wood-fired favourites, coastal plates and something sweet. Choose your favourites and build your order.</p></div>
-        <div className="flex flex-wrap gap-3 text-[11px] text-white/80"><span className="flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2"><Clock3 size={14}/> Made fresh</span><span className="flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2"><Truck size={14}/> Delivery preview</span></div>
+        <div className="flex flex-wrap gap-3 text-[11px] text-white/80"><span className="flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2"><Clock3 size={14}/> Made fresh</span><span className="flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2"><Truck size={14}/> Delivery available</span></div>
       </div>
     </section>
     <section className="mx-auto max-w-7xl px-5 py-12 md:py-16">
