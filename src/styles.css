@@ -302,14 +302,14 @@ body { font-family: var(--font-sans); }
 }
 .pizza-builder__stage-frame {
   position: relative;
-  width: min(318px, calc(100vw - 88px), 39svh);
+  width: min(350px, calc(100vw - 72px), 46svh);
   aspect-ratio: 1;
   isolation: isolate;
   transition: width 420ms cubic-bezier(.2, .8, .2, 1.16);
 }
-.pizza-builder__stage-frame[data-size="S"] { width: min(240px, calc(100vw - 136px), 30svh); }
-.pizza-builder__stage-frame[data-size="M"] { width: min(280px, calc(100vw - 104px), 35svh); }
-.pizza-builder__stage-frame[data-size="L"] { width: min(318px, calc(100vw - 88px), 39svh); }
+.pizza-builder__stage-frame[data-size="S"] { width: min(220px, calc(100vw - 136px), 31svh); }
+.pizza-builder__stage-frame[data-size="M"] { width: min(265px, calc(100vw - 104px), 36svh); }
+.pizza-builder__stage-frame[data-size="L"] { width: min(350px, calc(100vw - 72px), 46svh); }
 .pizza-builder__pizza-stage {
   position: relative;
   z-index: 1;
@@ -645,10 +645,10 @@ body { font-family: var(--font-sans); }
 @media (max-height: 740px) {
   .pizza-builder__header { min-height: 58px; }
   .pizza-builder__stage-area { min-height: 275px; padding-block: 3px 7px; }
-  .pizza-builder__stage-frame { width: min(294px, calc(100vw - 88px), 37svh); }
-  .pizza-builder__stage-frame[data-size="S"] { width: min(218px, calc(100vw - 136px), 27svh); }
-  .pizza-builder__stage-frame[data-size="M"] { width: min(258px, calc(100vw - 104px), 33svh); }
-  .pizza-builder__stage-frame[data-size="L"] { width: min(294px, calc(100vw - 88px), 37svh); }
+  .pizza-builder__stage-frame { width: min(324px, calc(100vw - 72px), 43svh); }
+  .pizza-builder__stage-frame[data-size="S"] { width: min(210px, calc(100vw - 136px), 28svh); }
+  .pizza-builder__stage-frame[data-size="M"] { width: min(250px, calc(100vw - 104px), 33svh); }
+  .pizza-builder__stage-frame[data-size="L"] { width: min(324px, calc(100vw - 72px), 43svh); }
   .pizza-builder__status { margin-top: 8px; }
   .pizza-builder__dock { padding-top: 12px; padding-bottom: 8px; }
   .pizza-builder__dock-heading { padding-bottom: 9px; }
