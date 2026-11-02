@@ -17,7 +17,6 @@ const menu = [
 ];
 type Cart = Record<string, number>;
 const money = (value: number) => "KSh " + value.toLocaleString("en-KE");
-const ORDER_PHONE = "254743898575";
 
 function OrderDemo() {
   const [cart, setCart] = useState<Cart>({});
