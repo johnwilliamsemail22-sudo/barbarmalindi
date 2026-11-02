@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Activity, Bell, Check, ChefHat, Clock3, LayoutDashboard, LogOut, PackageCheck, Search, ShoppingBag, TrendingUp, Truck, Volume2, X } from "lucide-react";
+import { Bell, Check, Clock3, LayoutDashboard, LogOut, PackageCheck, Search, ShoppingBag, TrendingUp, Truck, Volume2 } from "lucide-react";
 
 export const Route = createFileRoute("/staff-demo")({
   head: () => ({ meta: [{ title: "Staff dashboard preview | Bar Bar Malindi" }, { name: "description", content: "Interactive staff dashboard preview for Bar Bar Malindi." }] }),
